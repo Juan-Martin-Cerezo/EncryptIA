@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.example.encryptia"
-    compileSdk = 35
+    compileSdk = 36
+
 
     defaultConfig {
         applicationId = "com.example.encryptia"
