@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -51,16 +52,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
+@Preview(showBackground = true)
+@Composable
+fun PreviewEncryptorApp() {
+    EncryptorApp()
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncryptorApp() {
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
     var resultText by remember { mutableStateOf("") }
-    var selectedMethod by remember { mutableStateOf("Palérinofu") }
-    var expanded by remember { mutableStateOf(false) }
+    var selectedKey by remember { mutableStateOf("Palérinofu") }  // Antes 'selectedMethod'
+    var expandedKey by remember { mutableStateOf(false) }
 
-    val methods = listOf("Palérinofu", "Murciélago 0", "Corrida en E")
+    var selectedMurcType by remember { mutableStateOf("0") } // Tipo de Murcielago
+    var expandedType by remember { mutableStateOf(false) }
+
+    val keys = listOf("Palérinofu", "Murciélago", "Corrida en E")
+    val murcTypes = listOf("0", "1")
     val context = LocalContext.current
 
     Scaffold(
@@ -74,7 +83,8 @@ fun EncryptorApp() {
             ) {
                 Button(
                     onClick = {
-                        resultText = Encryptor.encrypt(inputText.text, selectedMethod)
+                        val fullKey = if (selectedKey == "Murciélago") "Murciélago $selectedMurcType" else selectedKey
+                        resultText = Encryptor.encrypt(inputText.text, fullKey)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27AE60))
                 ) {
@@ -83,7 +93,8 @@ fun EncryptorApp() {
 
                 Button(
                     onClick = {
-                        resultText = Encryptor.decrypt(inputText.text, selectedMethod)
+                        val fullKey = if (selectedKey == "Murciélago") "Murciélago $selectedMurcType" else selectedKey
+                        resultText = Encryptor.decrypt(inputText.text, fullKey)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
                 ) {
@@ -107,30 +118,68 @@ fun EncryptorApp() {
                 color = Color.White
             )
 
-            // Selector de método
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
+            // --- Fila de selección de clave y tipo ---
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextField(
-                    value = selectedMethod,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Método") },
-                    modifier = Modifier.menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                // Selector Clave
+                ExposedDropdownMenuBox(
+                    expanded = expandedKey,
+                    onExpandedChange = { expandedKey = !expandedKey }
                 ) {
-                    methods.forEach { method ->
-                        DropdownMenuItem(
-                            text = { Text(method) },
-                            onClick = {
-                                selectedMethod = method
-                                expanded = false
-                            }
+                    TextField(
+                        value = selectedKey,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Clave") },
+                        modifier = Modifier.menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedKey,
+                        onDismissRequest = { expandedKey = false }
+                    ) {
+                        keys.forEach { key ->
+                            DropdownMenuItem(
+                                text = { Text(key) },
+                                onClick = {
+                                    selectedKey = key
+                                    expandedKey = false
+                                    // Reset tipo Murcielago al cambiar clave
+                                    if (key != "Murciélago") selectedMurcType = "0"
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Selector de tipo Murcielago (solo si la clave es Murcielago)
+                if (selectedKey == "Murciélago") {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedType,
+                        onExpandedChange = { expandedType = !expandedType }
+                    ) {
+                        TextField(
+                            value = selectedMurcType,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Tipo") },
+                            modifier = Modifier.menuAnchor()
                         )
+                        ExposedDropdownMenu(
+                            expanded = expandedType,
+                            onDismissRequest = { expandedType = false }
+                        ) {
+                            murcTypes.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(type) },
+                                    onClick = {
+                                        selectedMurcType = type
+                                        expandedType = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
