@@ -5,7 +5,8 @@ object Encryptor {
     fun encrypt(text: String, method: String): String {
         return when (method) {
             "Palérinofu" -> palefinoEncrypt(text)
-            "Murciélago 0" -> murcielagoEncrypt(text)
+            "Murciélago 0" -> murcielagoEncrypt(text, 0)
+            "Murciélago 1" -> murcielagoEncrypt(text, 1)
             "Corrida en E" -> corridaEncrypt(text)
             "Paquidermo 0" -> paquidermoEncrypt(text, 0)
             "Paquidermo 1" -> paquidermoEncrypt(text, 1)
@@ -22,7 +23,8 @@ object Encryptor {
     fun decrypt(text: String, method: String): String {
         return when (method) {
             "Palérinofu" -> palefinoDecrypt(text)
-            "Murciélago 0" -> murcielagoDecrypt(text)
+            "Murciélago 0" -> murcielagoDecrypt(text, 0)
+            "Murciélago 1" -> murcielagoDecrypt(text, 1)
             "Corrida en E" -> corridaDecrypt(text)
             "Paquidermo 0" -> paquidermoDecrypt(text, 0)
             "Paquidermo 1" -> paquidermoDecrypt(text, 1)
@@ -49,16 +51,25 @@ object Encryptor {
     private fun palefinoDecrypt(text: String): String = palefinoEncrypt(text)
 
     // ---- Murciélago ----
-    private val murcielagoDict = mapOf(
+    private val murcielago0 = mapOf(
         'm' to '0', 'u' to '1', 'r' to '2', 'c' to '3', 'i' to '4',
         'e' to '5', 'l' to '6', 'a' to '7', 'g' to '8', 'o' to '9'
     )
-    private val invMurcielagoDict = murcielagoDict.entries.associate { (k, v) -> v to k }
+    private val murcielago1 = mapOf(
+        'm' to '1', 'u' to '2', 'r' to '3', 'c' to '4', 'i' to '5',
+        'e' to '6', 'l' to '7', 'a' to '8', 'g' to '9', 'o' to '0'
+    )
 
-    private fun murcielagoEncrypt(text: String) =
-        text.map { murcielagoDict[it.lowercaseChar()] ?: it }.joinToString("")
-    private fun murcielagoDecrypt(text: String) =
-        text.map { invMurcielagoDict[it] ?: it }.joinToString("")
+    private fun murcielagoEncrypt(text: String, type: Int): String {
+        val dict = if (type == 0) murcielago0 else murcielago1
+        return text.map { dict[it.lowercaseChar()] ?: it }.joinToString("")
+    }
+
+    private fun murcielagoDecrypt(text: String, type: Int): String {
+        val dict = if (type == 0) murcielago0 else murcielago1
+        val inv = dict.entries.associate { (k, v) -> v to k }
+        return text.map { inv[it] ?: it }.joinToString("")
+    }
 
     // ---- Corrida en E ---- (shift +4 Caesar)
     private val abc = ('a'..'z').toList()
@@ -85,6 +96,7 @@ object Encryptor {
         val dict = if (type == 0) paquidermo0 else paquidermo1
         return text.map { dict[it.lowercaseChar()] ?: it }.joinToString("")
     }
+
     private fun paquidermoDecrypt(text: String, type: Int): String {
         val dict = if (type == 0) paquidermo0 else paquidermo1
         val inv = dict.entries.associate { (k, v) -> v to k }
@@ -146,16 +158,12 @@ object Encryptor {
         'r' to 't',
         'l' to 'f',
         'i' to 'u',
-        'n' to 's',
-        // NOTE: "a" is already mapped to 'e', so we don't repeat
+        'n' to 's'
     )
-
     private val karlinaDict: Map<Char, Char> =
         (karlinaPairs + karlinaPairs.map { (a, b) -> b to a }).toMap()
-
     private fun karlinaEncrypt(text: String) =
         text.map { karlinaDict[it.lowercaseChar()] ?: it }.joinToString("")
-
     private fun karlinaDecrypt(text: String) =
         text.map { karlinaDict[it.lowercaseChar()] ?: it }.joinToString("")
 
