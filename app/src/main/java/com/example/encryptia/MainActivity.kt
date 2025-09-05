@@ -46,7 +46,7 @@ fun EncryptorApp() {
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
     var outputText by remember { mutableStateOf("") }
 
-    var selectedKey by remember { mutableStateOf("Palérinofu") }
+    var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
     var expandedKey by remember { mutableStateOf(false) }
 
     var selectedMurcType by remember { mutableStateOf("0") }
@@ -54,11 +54,13 @@ fun EncryptorApp() {
 
     var encryptMode by remember { mutableStateOf(true) } // true = encriptar, false = desencriptar
 
+    // 🔹 Keys are now automatically sorted alphabetically
     val keys = listOf(
         "Palérinofu", "Murciélago", "Corrida en E",
         "Paquidermo", "Araucano", "Superamigos", "Vocalica",
         "Idioma X", "Dame tu pico", "Karlina Betfuse"
-    )
+    ).sorted()
+
     val murcTypes = listOf("0", "1")
     val context = LocalContext.current
 
@@ -89,13 +91,8 @@ fun EncryptorApp() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Encriptador Traductor",
-                fontSize = 22.sp,
-                color = primaryText
-            )
 
-            // --- Selectores + Flecha ---
+            // --- Selectors + Flecha ---
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -229,7 +226,7 @@ fun EncryptorApp() {
 
             // Output TextField
             Text(
-                text = if (encryptMode) "Texto Encriptado:" else "Texto Desencriptado:",
+                text = if (encryptMode) "Texto Desencriptado:" else "Texto Encriptado:",
                 color = primaryText
             )
             Box(
@@ -267,4 +264,3 @@ fun EncryptorApp() {
         }
     }
 }
-

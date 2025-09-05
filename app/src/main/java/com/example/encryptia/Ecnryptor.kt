@@ -50,14 +50,18 @@ object Encryptor {
 
     private fun palefinoDecrypt(text: String): String = palefinoEncrypt(text)
 
-    // ---- Murciélago ----
+    // ---- Murciélago 0----
     private val murcielago0 = mapOf(
         'm' to '0', 'u' to '1', 'r' to '2', 'c' to '3', 'i' to '4',
-        'e' to '5', 'l' to '6', 'a' to '7', 'g' to '8', 'o' to '9'
+        'e' to '5', 'l' to '6', 'a' to '7', 'g' to '8', 'o' to '9',
+        '0' to 'm', '1' to 'u', '2' to 'r', '3' to 'c', '4' to 'i',
+        '5' to 'e', '6' to 'l', '7' to 'a', '8' to 'g', '9' to 'o'
     )
     private val murcielago1 = mapOf(
         'm' to '1', 'u' to '2', 'r' to '3', 'c' to '4', 'i' to '5',
-        'e' to '6', 'l' to '7', 'a' to '8', 'g' to '9', 'o' to '0'
+        'e' to '6', 'l' to '7', 'a' to '8', 'g' to '9', 'o' to '0',
+        '1' to 'm', '2' to 'u', '3' to 'r', '4' to 'c', '5' to 'i',
+        '6' to 'e', '7' to 'l', '8' to 'a', '9' to 'g', '0' to 'o'
     )
 
     private fun murcielagoEncrypt(text: String, type: Int): String {
@@ -84,12 +88,18 @@ object Encryptor {
     private val paquidermo0 = mapOf(
         'p' to '0', 'a' to '1', 'q' to '2', 'u' to '3',
         'i' to '4', 'd' to '5', 'e' to '6', 'r' to '7',
-        'm' to '8', 'o' to '9'
+        'm' to '8', 'o' to '9',
+        '0' to 'p', '1' to 'a', '2' to 'q', '3' to 'u',
+        '4' to 'i', '5' to 'd', '6' to 'e', '7' to 'r',
+        '8' to 'm', '9' to 'o'
     )
     private val paquidermo1 = mapOf(
         'p' to '1', 'a' to '2', 'q' to '3', 'u' to '4',
         'i' to '5', 'd' to '6', 'e' to '7', 'r' to '8',
-        'm' to '9', 'o' to '0'
+        'm' to '9', 'o' to '0',
+        '1' to 'p', '2' to 'a', '3' to 'q', '4' to 'u',
+        '5' to 'i', '6' to 'd', '7' to 'e', '8' to 'r',
+        '9' to 'm', '0' to 'o'
     )
 
     private fun paquidermoEncrypt(text: String, type: Int): String {
@@ -126,7 +136,10 @@ object Encryptor {
         text.map { invSuperamigos[it.lowercaseChar()] ?: it }.joinToString("")
 
     // ---- Vocalica ----
-    private val vocalicaDict = mapOf('a' to '1', 'e' to '2', 'i' to '3', 'o' to '4', 'u' to '5')
+    private val vocalicaDict = mapOf(
+        'a' to '1', 'e' to '2', 'i' to '3', 'o' to '4', 'u' to '5',
+        '1' to 'a', '2' to 'e', '3' to 'i', '4' to 'o', '5' to 'u'
+    )
     private val invVocalica = vocalicaDict.entries.associate { (k, v) -> v to k }
     private fun vocalicaEncrypt(text: String) =
         text.map { vocalicaDict[it.lowercaseChar()] ?: it }.joinToString("")
