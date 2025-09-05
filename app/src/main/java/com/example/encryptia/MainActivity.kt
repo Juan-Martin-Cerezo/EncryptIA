@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,20 +51,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewEncryptorApp() {
     EncryptorApp()
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncryptorApp() {
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
     var resultText by remember { mutableStateOf("") }
-    var selectedKey by remember { mutableStateOf("Palérinofu") }  // Antes 'selectedMethod'
+    var selectedKey by remember { mutableStateOf("Palérinofu") }
     var expandedKey by remember { mutableStateOf(false) }
 
-    var selectedMurcType by remember { mutableStateOf("0") } // Tipo de Murcielago
+    var selectedMurcType by remember { mutableStateOf("0") }
     var expandedType by remember { mutableStateOf(false) }
 
     val keys = listOf("Palérinofu", "Murciélago", "Corrida en E")
@@ -78,28 +79,10 @@ fun EncryptorApp() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xFF1A252F))
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Button(
-                    onClick = {
-                        val fullKey = if (selectedKey == "Murciélago") "Murciélago $selectedMurcType" else selectedKey
-                        resultText = Encryptor.encrypt(inputText.text, fullKey)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27AE60))
-                ) {
-                    Text("Encriptar", color = Color.White)
-                }
-
-                Button(
-                    onClick = {
-                        val fullKey = if (selectedKey == "Murciélago") "Murciélago $selectedMurcType" else selectedKey
-                        resultText = Encryptor.decrypt(inputText.text, fullKey)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
-                ) {
-                    Text("Desencriptar", color = Color.White)
-                }
+                // Barra inferior vacía por ahora
             }
         }
     ) { innerPadding ->
@@ -118,10 +101,11 @@ fun EncryptorApp() {
                 color = Color.White
             )
 
-            // --- Fila de selección de clave y tipo ---
+            // --- Selectores + Botón único ---
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 // Selector Clave
                 ExposedDropdownMenuBox(
@@ -133,7 +117,7 @@ fun EncryptorApp() {
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Clave") },
-                        modifier = Modifier.menuAnchor()
+                        modifier = Modifier.menuAnchor().weight(1f)
                     )
                     ExposedDropdownMenu(
                         expanded = expandedKey,
@@ -145,7 +129,6 @@ fun EncryptorApp() {
                                 onClick = {
                                     selectedKey = key
                                     expandedKey = false
-                                    // Reset tipo Murcielago al cambiar clave
                                     if (key != "Murciélago") selectedMurcType = "0"
                                 }
                             )
@@ -153,7 +136,7 @@ fun EncryptorApp() {
                     }
                 }
 
-                // Selector de tipo Murcielago (solo si la clave es Murcielago)
+                // Selector de tipo Murcielago
                 if (selectedKey == "Murciélago") {
                     ExposedDropdownMenuBox(
                         expanded = expandedType,
@@ -164,7 +147,7 @@ fun EncryptorApp() {
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Tipo") },
-                            modifier = Modifier.menuAnchor()
+                            modifier = Modifier.menuAnchor().weight(1f)
                         )
                         ExposedDropdownMenu(
                             expanded = expandedType,
@@ -182,6 +165,24 @@ fun EncryptorApp() {
                         }
                     }
                 }
+
+                // Botón único con flecha
+                IconButton(
+                    onClick = {
+                        val fullKey = if (selectedKey == "Murciélago") "Murciélago $selectedMurcType" else selectedKey
+                        resultText = if (resultText.isEmpty()) {
+                            Encryptor.encrypt(inputText.text, fullKey)
+                        } else {
+                            Encryptor.decrypt(inputText.text, fullKey)
+                        }
+                    },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_arrow), // <- reemplazá con tu ícono de flecha
+                        contentDescription = "Encriptar/Desencriptar"
+                    )
+                }
             }
 
             // Entrada de texto
@@ -195,7 +196,6 @@ fun EncryptorApp() {
             // Resultado
             Text("Resultado:", color = Color.White)
 
-            // Cuadro principal del resultado con botón dentro
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -203,7 +203,6 @@ fun EncryptorApp() {
                     .background(Color(0xFF34495E))
                     .padding(8.dp)
             ) {
-                // Texto del resultado
                 Text(
                     text = resultText,
                     color = Color.Yellow,
@@ -213,7 +212,6 @@ fun EncryptorApp() {
                         .padding(8.dp)
                 )
 
-                // Botón de copiar alineado abajo a la derecha
                 IconButton(
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
