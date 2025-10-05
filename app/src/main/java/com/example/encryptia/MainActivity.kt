@@ -104,11 +104,12 @@ fun EncryptorApp(
     val keys = listOf(
         "Palérinofu", "Murciélago", "Corrida",
         "Paquidermo", "Araucano", "Superamigos", "Vocalica",
-        "Idioma X", "Dame tu pico", "Karlina Betfuse"
+        "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
     ).sorted()
 
     val murcTypes = listOf("0", "1")
     val letters = ('A'..'N').map { it.toString() } + "Ñ" + ('O'..'Z').map { it.toString() }
+    val morseTypes = listOf("Normal", "Extendido")
 
     val context = LocalContext.current
     val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
@@ -157,7 +158,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_book),
                         contentDescription = "Listado de claves",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
 
@@ -226,6 +227,7 @@ fun EncryptorApp(
                                     selectedOption = when (key) {
                                         "Murciélago", "Paquidermo" -> "0"
                                         "Corrida" -> "E"
+                                        "Morse" -> "Normal"
                                         else -> "-"
                                     }
                                 }
@@ -237,6 +239,7 @@ fun EncryptorApp(
                 val optionList = when (selectedKey) {
                     "Murciélago", "Paquidermo" -> murcTypes
                     "Corrida" -> letters
+                    "Morse" -> morseTypes
                     else -> listOf("-")
                 }
 

@@ -19,7 +19,8 @@ object Encryptor {
             "Vocalica" -> vocalicaEncrypt(text)
             "Idioma X" -> idiomaXEncrypt(text)
             "Dame tu pico" -> dameTuPicoEncrypt(text)
-            "Karlina Betfuse" -> karlinaEncrypt(text)
+            "Morse" -> morseEncrypt(text, option)
+                "Karlina Betfuse" -> karlinaEncrypt(text)
             else -> text
         }
     }
@@ -41,7 +42,8 @@ object Encryptor {
             "Vocalica" -> vocalicaDecrypt(text)
             "Idioma X" -> idiomaXDecrypt(text)
             "Dame tu pico" -> dameTuPicoDecrypt(text)
-            "Karlina Betfuse" -> karlinaDecrypt(text)
+            "Morse" -> morseDecrypt(text, option)
+                "Karlina Betfuse" -> karlinaDecrypt(text)
             else -> text
         }
     }
@@ -234,9 +236,75 @@ object Encryptor {
     )
     private val invMorseDict = morseDict.entries.associate { (k, v) -> v to k }
 
-    private fun morseEncrypt(text: String) =
-        text.lowercase().mapNotNull { ch -> morseDict[ch] ?: if (ch==' ') "/" else null }.joinToString(" ")
+    // --- Encrypt ---
+    private fun morseEncrypt(text: String, option: String = "Normal"): String {
+        val t = text.lowercase()
+        val result = StringBuilder()
+        var i = 0
+        while (i < t.length) {
+            val ch = t[i]
+            val next = t.getOrNull(i + 1)
+            when (option) {
+                "Normal" -> {
+                    when {
+                        ch == '.' && next == ' ' -> {
+                            result.append("//")
+                            i++ // saltar el espacio siguiente
+                        }
+                        ch == '.' -> result.append("///")
+                        ch == ' ' -> result.append("/")
+                        morseDict.containsKey(ch) -> {
+                            if (result.isNotEmpty() && result.last() != '/') result.append(" ")
+                            result.append(morseDict[ch])
+                        }
+                        else -> result.append(ch)
+                    }
+                }
+                "Extendido" -> {
+                    when {
+                        ch == '.' && next == ' ' -> {
+                            result.append("///")
+                            i++ // saltar el espacio siguiente
+                        }
+                        ch == '.' -> result.append("////")
+                        ch == ' ' -> result.append("//")
+                        morseDict.containsKey(ch) -> {
+                            if (result.isNotEmpty() && !result.endsWith("/")) result.append("/")
+                            result.append(morseDict[ch])
+                        }
+                        else -> result.append(ch)
+                    }
+                }
+            }
+            i++
+        }
+        return result.toString()
+    }
 
-    private fun morseDecrypt(text: String) =
-        text.split(" ").mapNotNull { code -> if (code=="/") " " else invMorseDict[code] }.joinToString("")
+    // --- Decrypt ---
+    private fun morseDecrypt(text: String, option: String = "Normal"): String {
+        return if (option == "Normal") {
+            val t = text.replace("///", "._dot_")  // punto sin espacio
+                .replace("//", "._dot_space_")      // punto seguido de espacio
+            t.split(" ", "/").mapNotNull { code ->
+                when (code) {
+                    "_dot_" -> "."
+                    "_dot_space_" -> ". "
+                    "" -> null
+                    else -> invMorseDict[code] ?: null
+                }
+            }.joinToString("")
+        } else {
+            val t = text.replace("////", "._dot_")  // punto sin espacio
+                .replace("///", "._dot_space_")     // punto seguido de espacio
+            t.split("/").mapNotNull { code ->
+                when (code) {
+                    "_dot_" -> "."
+                    "_dot_space_" -> ". "
+                    "" -> null
+                    else -> invMorseDict[code] ?: null
+                }
+            }.joinToString("")
+        }
+    }
 }
