@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -84,7 +85,7 @@ fun EncryptorApp() {
                     inputText = TextFieldValue(visionText.text)
                 }
                 .addOnFailureListener {
-                    outputText = "Error al reconocer texto"
+                    Toast.makeText(context, "Error al reconocer texto", Toast.LENGTH_SHORT).show()
                 }
         }
     }
@@ -95,6 +96,17 @@ fun EncryptorApp() {
     val primaryText = Color.White
     val secondaryText = Color(0xFFB0B0B0)
     val resultColor = Color(0xFF03DAC6)
+
+    // Reprocesar en tiempo real ante cualquier cambio relevante
+    LaunchedEffect(inputText.text, selectedKey, selectedOption, encryptMode) {
+        val method = selectedKey
+        val option = selectedOption
+        outputText = if (encryptMode) {
+            Encryptor.encrypt(inputText.text, method, option)
+        } else {
+            Encryptor.decrypt(inputText.text, method, option)
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -168,8 +180,6 @@ fun EncryptorApp() {
                                 onClick = {
                                     selectedKey = key
                                     expandedKey = false
-                                    outputText = ""
-                                    encryptMode = true
                                     selectedOption = when (key) {
                                         "Murciélago", "Paquidermo" -> "0"
                                         "Corrida" -> "E"
@@ -223,8 +233,6 @@ fun EncryptorApp() {
                                     onClick = {
                                         selectedOption = opt
                                         expandedOption = false
-                                        outputText = ""
-                                        encryptMode = true
                                     }
                                 )
                             }
@@ -233,12 +241,17 @@ fun EncryptorApp() {
                 }
             }
 
+            // Etiqueta del cuadro superior
+            Text(
+                text = if (encryptMode) "Español" else "Encriptado",
+                color = secondaryText,
+                fontSize = 14.sp
+            )
+
             TextField(
                 value = inputText,
                 onValueChange = {
                     inputText = it
-                    outputText = ""
-                    encryptMode = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -256,14 +269,20 @@ fun EncryptorApp() {
 
             IconButton(
                 onClick = {
-                    val method = selectedKey
-                    val option = selectedOption
-                    outputText = if (encryptMode) {
-                        Encryptor.encrypt(inputText.text, method, option)
+                    // Intercambiar textos y modo, preservando lo escrito
+                    val prevOutput = outputText
+                    val newMode = !encryptMode
+
+                    val newInput = prevOutput
+                    val newOutput = if (newMode) {
+                        Encryptor.encrypt(newInput, selectedKey, selectedOption)
                     } else {
-                        Encryptor.decrypt(inputText.text, method, option)
+                        Encryptor.decrypt(newInput, selectedKey, selectedOption)
                     }
-                    encryptMode = !encryptMode
+
+                    inputText = TextFieldValue(newInput)
+                    outputText = newOutput
+                    encryptMode = newMode
                 },
                 modifier = Modifier
                     .size(64.dp)
@@ -275,6 +294,13 @@ fun EncryptorApp() {
                     contentDescription = "Alternar Encriptar/Desencriptar"
                 )
             }
+
+            // Etiqueta del cuadro inferior
+            Text(
+                text = if (encryptMode) "Encriptado" else "Español",
+                color = secondaryText,
+                fontSize = 14.sp
+            )
 
             Box(
                 modifier = Modifier
