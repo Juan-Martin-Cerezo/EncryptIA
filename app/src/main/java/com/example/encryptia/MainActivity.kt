@@ -36,7 +36,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EncryptorApp()
+            var showBook by remember { mutableStateOf(false) }
+            var selectedInfoKey by remember { mutableStateOf<String?>(null) }
+
+            if (showBook) {
+                EncryptBook(
+                    onBack = { showBook = false; selectedInfoKey = null },
+                    onSelectKey = { key ->
+                        selectedInfoKey = if (key.isNotEmpty()) key else null
+                    },
+                    selectedKey = selectedInfoKey
+                )
+            } else {
+                EncryptorApp(
+                    onOpenBook = { showBook = true }
+                )
+            }
         }
     }
 }
@@ -49,7 +64,7 @@ fun PreviewEncryptorApp() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EncryptorApp() {
+fun EncryptorApp(onOpenBook: () -> Unit = {}) {
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
     var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
     var expandedKey by remember { mutableStateOf(false) }
@@ -103,13 +118,29 @@ fun EncryptorApp() {
 
     Scaffold(
         bottomBar = {
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(surfaceColor)
                     .padding(16.dp),
-                contentAlignment = Alignment.Center
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // 📘 Botón para abrir el libro de claves
+                IconButton(
+                    onClick = onOpenBook,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(accentColor, CircleShape)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_book), // usa un ícono de "info" o "book"
+                        contentDescription = "Listado de claves",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                // 📷 Botón de cámara
                 IconButton(
                     onClick = { cameraLauncher.launch(null) },
                     modifier = Modifier
