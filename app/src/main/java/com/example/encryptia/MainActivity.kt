@@ -3,9 +3,12 @@ package com.example.encryptia
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,6 +28,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,13 +56,11 @@ fun EncryptorApp() {
     var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
     var expandedKey by remember { mutableStateOf(false) }
 
-    // second selector (generalized): puede contener "0"/"1", letras A-Z o "-" (deshabilitado)
     var selectedOption by remember { mutableStateOf("-") }
     var expandedOption by remember { mutableStateOf(false) }
 
-    var encryptMode by remember { mutableStateOf(true) } // true = encriptar, false = desencriptar
+    var encryptMode by remember { mutableStateOf(true) }
 
-    // keys: ahora incluye "Corrida"
     val keys = listOf(
         "Palérinofu", "Murciélago", "Corrida",
         "Paquidermo", "Araucano", "Superamigos", "Vocalica",
@@ -66,6 +70,24 @@ fun EncryptorApp() {
     val murcTypes = listOf("0", "1")
     val letters = ('A'..'N').map { it.toString() } + "Ñ" + ('O'..'Z').map { it.toString() }
     val context = LocalContext.current
+
+    // --- OCR recognizer ---
+    val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap: Bitmap? ->
+        bitmap?.let {
+            val image = InputImage.fromBitmap(it, 0)
+            recognizer.process(image)
+                .addOnSuccessListener { visionText ->
+                    inputText = TextFieldValue(visionText.text)
+                }
+                .addOnFailureListener {
+                    outputText = "Error al reconocer texto"
+                }
+        }
+    }
 
     val bgColor = Color(0xFF121212)
     val surfaceColor = Color(0xFF1E1E1E)
@@ -81,8 +103,23 @@ fun EncryptorApp() {
                     .fillMaxWidth()
                     .background(surfaceColor)
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.Center
-            ) { }
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // 📸 Botón OCR (izquierda)
+                IconButton(
+                    onClick = { cameraLauncher.launch(null) },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(accentColor, CircleShape)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_camera),
+                        contentDescription = "Escanear texto"
+                    )
+                }
+
+                // 🧾 (Podés agregar otros iconos a futuro aquí)
+            }
         }
     ) { innerPadding ->
         Column(
@@ -101,7 +138,6 @@ fun EncryptorApp() {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Selector Clave
                 ExposedDropdownMenuBox(
                     expanded = expandedKey,
                     onExpandedChange = { expandedKey = !expandedKey },
@@ -134,10 +170,9 @@ fun EncryptorApp() {
                                     expandedKey = false
                                     outputText = ""
                                     encryptMode = true
-                                    // set default for second selector depending on key
                                     selectedOption = when (key) {
                                         "Murciélago", "Paquidermo" -> "0"
-                                        "Corrida" -> "E" // por defecto E
+                                        "Corrida" -> "E"
                                         else -> "-"
                                     }
                                 }
@@ -146,7 +181,6 @@ fun EncryptorApp() {
                     }
                 }
 
-                // Segundo selector (siempre visible, pero deshabilitado si no hay opciones)
                 val optionList = when (selectedKey) {
                     "Murciélago", "Paquidermo" -> murcTypes
                     "Corrida" -> letters
@@ -199,7 +233,6 @@ fun EncryptorApp() {
                 }
             }
 
-            // Input TextField (sin título, más alto)
             TextField(
                 value = inputText,
                 onValueChange = {
@@ -221,8 +254,6 @@ fun EncryptorApp() {
                 )
             )
 
-
-            // Botón circular violeta al medio
             IconButton(
                 onClick = {
                     val method = selectedKey
@@ -245,7 +276,6 @@ fun EncryptorApp() {
                 )
             }
 
-            // Output (sin título)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.text.recognition)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
