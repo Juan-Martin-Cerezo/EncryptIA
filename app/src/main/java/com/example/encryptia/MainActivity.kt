@@ -51,15 +51,13 @@ fun PreviewEncryptorApp() {
 @Composable
 fun EncryptorApp() {
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
-    var outputText by remember { mutableStateOf("") }
-
     var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
     var expandedKey by remember { mutableStateOf(false) }
 
     var selectedOption by remember { mutableStateOf("-") }
     var expandedOption by remember { mutableStateOf(false) }
 
-    var encryptMode by remember { mutableStateOf(true) }
+    var encryptMode by remember { mutableStateOf(true) } // true = Español → Encriptado
 
     val keys = listOf(
         "Palérinofu", "Murciélago", "Corrida",
@@ -69,9 +67,8 @@ fun EncryptorApp() {
 
     val murcTypes = listOf("0", "1")
     val letters = ('A'..'N').map { it.toString() } + "Ñ" + ('O'..'Z').map { it.toString() }
-    val context = LocalContext.current
 
-    // --- OCR recognizer ---
+    val context = LocalContext.current
     val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -84,11 +81,12 @@ fun EncryptorApp() {
                     inputText = TextFieldValue(visionText.text)
                 }
                 .addOnFailureListener {
-                    outputText = "Error al reconocer texto"
+                    // Aquí podrías mostrar un Toast o similar
                 }
         }
     }
 
+    // --- Colores ---
     val bgColor = Color(0xFF121212)
     val surfaceColor = Color(0xFF1E1E1E)
     val accentColor = Color(0xFFBB86FC)
@@ -96,29 +94,34 @@ fun EncryptorApp() {
     val secondaryText = Color(0xFFB0B0B0)
     val resultColor = Color(0xFF03DAC6)
 
+    // --- Calculamos outputText derivado del estado ---
+    val outputText = remember(inputText.text, selectedKey, selectedOption, encryptMode) {
+        if (selectedKey == "Seleccioná una clave") ""
+        else if (encryptMode) Encryptor.encrypt(inputText.text, selectedKey, selectedOption)
+        else Encryptor.decrypt(inputText.text, selectedKey, selectedOption)
+    }
+
     Scaffold(
         bottomBar = {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(surfaceColor)
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                contentAlignment = Alignment.Center
             ) {
-                // 📸 Botón OCR (izquierda)
                 IconButton(
                     onClick = { cameraLauncher.launch(null) },
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(64.dp)
                         .background(accentColor, CircleShape)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_camera),
-                        contentDescription = "Escanear texto"
+                        contentDescription = "Escanear texto",
+                        modifier = Modifier.size(32.dp)
                     )
                 }
-
-                // 🧾 (Podés agregar otros iconos a futuro aquí)
             }
         }
     ) { innerPadding ->
@@ -138,6 +141,7 @@ fun EncryptorApp() {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // Clave
                 ExposedDropdownMenuBox(
                     expanded = expandedKey,
                     onExpandedChange = { expandedKey = !expandedKey },
@@ -168,7 +172,6 @@ fun EncryptorApp() {
                                 onClick = {
                                     selectedKey = key
                                     expandedKey = false
-                                    outputText = ""
                                     encryptMode = true
                                     selectedOption = when (key) {
                                         "Murciélago", "Paquidermo" -> "0"
@@ -187,11 +190,10 @@ fun EncryptorApp() {
                     else -> listOf("-")
                 }
 
+                // Tipo
                 ExposedDropdownMenuBox(
                     expanded = expandedOption,
-                    onExpandedChange = {
-                        if (optionList.size > 1) expandedOption = !expandedOption
-                    },
+                    onExpandedChange = { if (optionList.size > 1) expandedOption = !expandedOption },
                     modifier = Modifier.weight(0.4f)
                 ) {
                     TextField(
@@ -223,7 +225,6 @@ fun EncryptorApp() {
                                     onClick = {
                                         selectedOption = opt
                                         expandedOption = false
-                                        outputText = ""
                                         encryptMode = true
                                     }
                                 )
@@ -233,13 +234,15 @@ fun EncryptorApp() {
                 }
             }
 
+            // --- Cuadro superior ---
+            Text(
+                text = if (encryptMode) "Español" else "Encriptado",
+                color = secondaryText,
+                fontSize = 14.sp
+            )
             TextField(
                 value = inputText,
-                onValueChange = {
-                    inputText = it
-                    outputText = ""
-                    encryptMode = true
-                },
+                onValueChange = { inputText = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 120.dp),
@@ -254,15 +257,11 @@ fun EncryptorApp() {
                 )
             )
 
+            // --- Botón de intercambio ---
             IconButton(
                 onClick = {
-                    val method = selectedKey
-                    val option = selectedOption
-                    outputText = if (encryptMode) {
-                        Encryptor.encrypt(inputText.text, method, option)
-                    } else {
-                        Encryptor.decrypt(inputText.text, method, option)
-                    }
+                    val temp = inputText.text
+                    inputText = TextFieldValue(outputText)
                     encryptMode = !encryptMode
                 },
                 modifier = Modifier
@@ -272,10 +271,16 @@ fun EncryptorApp() {
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow),
-                    contentDescription = "Alternar Encriptar/Desencriptar"
+                    contentDescription = "Intercambiar idioma"
                 )
             }
 
+            // --- Cuadro inferior ---
+            Text(
+                text = if (encryptMode) "Encriptado" else "Español",
+                color = secondaryText,
+                fontSize = 14.sp
+            )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
