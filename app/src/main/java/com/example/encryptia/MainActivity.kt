@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -49,19 +50,21 @@ fun EncryptorApp() {
     var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
     var expandedKey by remember { mutableStateOf(false) }
 
-    var selectedMurcType by remember { mutableStateOf("0") }
-    var expandedType by remember { mutableStateOf(false) }
+    // second selector (generalized): puede contener "0"/"1", letras A-Z o "-" (deshabilitado)
+    var selectedOption by remember { mutableStateOf("-") }
+    var expandedOption by remember { mutableStateOf(false) }
 
     var encryptMode by remember { mutableStateOf(true) } // true = encriptar, false = desencriptar
 
-    // 🔹 Keys are now automatically sorted alphabetically
+    // keys: ahora incluye "Corrida"
     val keys = listOf(
-        "Palérinofu", "Murciélago", "Corrida en E",
+        "Palérinofu", "Murciélago", "Corrida",
         "Paquidermo", "Araucano", "Superamigos", "Vocalica",
         "Idioma X", "Dame tu pico", "Karlina Betfuse"
     ).sorted()
 
     val murcTypes = listOf("0", "1")
+    val letters = ('A'..'N').map { it.toString() } + "Ñ" + ('O'..'Z').map { it.toString() }
     val context = LocalContext.current
 
     val bgColor = Color(0xFF121212)
@@ -92,7 +95,7 @@ fun EncryptorApp() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            // --- Selectors + Flecha ---
+            // --- Selectores ---
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -108,7 +111,7 @@ fun EncryptorApp() {
                         value = selectedKey,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Clave", color = secondaryText) },
+                        placeholder = { Text("Clave", color = secondaryText) },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = surfaceColor,
                             unfocusedContainerColor = surfaceColor,
@@ -131,45 +134,61 @@ fun EncryptorApp() {
                                     expandedKey = false
                                     outputText = ""
                                     encryptMode = true
-                                    if (key != "Murciélago" && key != "Paquidermo") selectedMurcType = "0"
+                                    // set default for second selector depending on key
+                                    selectedOption = when (key) {
+                                        "Murciélago", "Paquidermo" -> "0"
+                                        "Corrida" -> "E" // por defecto E
+                                        else -> "-"
+                                    }
                                 }
                             )
                         }
                     }
                 }
 
-                // Selector de tipo Murciélago o Paquidermo
-                if (selectedKey == "Murciélago" || selectedKey == "Paquidermo") {
-                    ExposedDropdownMenuBox(
-                        expanded = expandedType,
-                        onExpandedChange = { expandedType = !expandedType },
-                        modifier = Modifier.weight(0.4f)
-                    ) {
-                        TextField(
-                            value = selectedMurcType,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Tipo", color = secondaryText) },
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = surfaceColor,
-                                unfocusedContainerColor = surfaceColor,
-                                focusedTextColor = primaryText,
-                                unfocusedTextColor = primaryText,
-                                cursorColor = accentColor
-                            ),
-                            modifier = Modifier.menuAnchor()
-                        )
+                // Segundo selector (siempre visible, pero deshabilitado si no hay opciones)
+                val optionList = when (selectedKey) {
+                    "Murciélago", "Paquidermo" -> murcTypes
+                    "Corrida" -> letters
+                    else -> listOf("-")
+                }
 
+                ExposedDropdownMenuBox(
+                    expanded = expandedOption,
+                    onExpandedChange = {
+                        if (optionList.size > 1) expandedOption = !expandedOption
+                    },
+                    modifier = Modifier.weight(0.4f)
+                ) {
+                    TextField(
+                        value = selectedOption,
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = optionList.size > 1,
+                        placeholder = { Text("Tipo", color = secondaryText) },
+                        colors = TextFieldDefaults.colors(
+                            disabledTextColor = Color.Gray,
+                            disabledContainerColor = surfaceColor,
+                            focusedContainerColor = surfaceColor,
+                            unfocusedContainerColor = surfaceColor,
+                            focusedTextColor = primaryText,
+                            unfocusedTextColor = primaryText,
+                            cursorColor = accentColor
+                        ),
+                        modifier = Modifier.menuAnchor()
+                    )
+
+                    if (optionList.size > 1) {
                         ExposedDropdownMenu(
-                            expanded = expandedType,
-                            onDismissRequest = { expandedType = false }
+                            expanded = expandedOption,
+                            onDismissRequest = { expandedOption = false }
                         ) {
-                            murcTypes.forEach { type ->
+                            optionList.forEach { opt ->
                                 DropdownMenuItem(
-                                    text = { Text(type) },
+                                    text = { Text(opt) },
                                     onClick = {
-                                        selectedMurcType = type
-                                        expandedType = false
+                                        selectedOption = opt
+                                        expandedOption = false
                                         outputText = ""
                                         encryptMode = true
                                     }
@@ -178,35 +197,9 @@ fun EncryptorApp() {
                         }
                     }
                 }
-
-                // Botón Flecha
-                IconButton(
-                    onClick = {
-                        val fullKey = when (selectedKey) {
-                            "Murciélago", "Paquidermo" -> "$selectedKey $selectedMurcType"
-                            else -> selectedKey
-                        }
-
-                        outputText = if (encryptMode) {
-                            Encryptor.encrypt(inputText.text, fullKey)
-                        } else {
-                            Encryptor.decrypt(inputText.text, fullKey)
-                        }
-                        encryptMode = !encryptMode
-                    },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(accentColor, RoundedCornerShape(8.dp))
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_arrow),
-                        contentDescription = "Alternar Encriptar/Desencriptar"
-                    )
-                }
             }
 
-            // Input TextField
-            Text("Texto a procesar:", color = primaryText)
+            // Input TextField (sin título, más alto)
             TextField(
                 value = inputText,
                 onValueChange = {
@@ -214,7 +207,11 @@ fun EncryptorApp() {
                     outputText = ""
                     encryptMode = true
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 120.dp),
+                minLines = 4,
+                placeholder = { Text("Texto a procesar", color = Color.Gray) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = surfaceColor,
                     unfocusedContainerColor = surfaceColor,
@@ -224,11 +221,31 @@ fun EncryptorApp() {
                 )
             )
 
-            // Output TextField
-            Text(
-                text = if (encryptMode) "Texto Desencriptado:" else "Texto Encriptado:",
-                color = primaryText
-            )
+
+            // Botón circular violeta al medio
+            IconButton(
+                onClick = {
+                    val method = selectedKey
+                    val option = selectedOption
+                    outputText = if (encryptMode) {
+                        Encryptor.encrypt(inputText.text, method, option)
+                    } else {
+                        Encryptor.decrypt(inputText.text, method, option)
+                    }
+                    encryptMode = !encryptMode
+                },
+                modifier = Modifier
+                    .size(64.dp)
+                    .background(accentColor, CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_arrow),
+                    contentDescription = "Alternar Encriptar/Desencriptar"
+                )
+            }
+
+            // Output (sin título)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

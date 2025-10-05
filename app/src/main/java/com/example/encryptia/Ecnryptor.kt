@@ -2,14 +2,18 @@ package com.example.encryptia
 
 object Encryptor {
 
-    fun encrypt(text: String, method: String): String {
+    fun encrypt(text: String, method: String, option: String = "-"): String {
         return when (method) {
             "Palérinofu" -> palefinoEncrypt(text)
-            "Murciélago 0" -> murcielagoEncrypt(text, 0)
-            "Murciélago 1" -> murcielagoEncrypt(text, 1)
-            "Corrida en E" -> corridaEncrypt(text)
-            "Paquidermo 0" -> paquidermoEncrypt(text, 0)
-            "Paquidermo 1" -> paquidermoEncrypt(text, 1)
+            "Murciélago" -> {
+                val type = option.toIntOrNull() ?: 0
+                murcielagoEncrypt(text, type)
+            }
+            "Paquidermo" -> {
+                val type = option.toIntOrNull() ?: 0
+                paquidermoEncrypt(text, type)
+            }
+            "Corrida" -> corridaEncrypt(text, option)
             "Araucano" -> araucanoEncrypt(text)
             "Superamigos" -> superamigosEncrypt(text)
             "Vocalica" -> vocalicaEncrypt(text)
@@ -20,14 +24,18 @@ object Encryptor {
         }
     }
 
-    fun decrypt(text: String, method: String): String {
+    fun decrypt(text: String, method: String, option: String = "-"): String {
         return when (method) {
             "Palérinofu" -> palefinoDecrypt(text)
-            "Murciélago 0" -> murcielagoDecrypt(text, 0)
-            "Murciélago 1" -> murcielagoDecrypt(text, 1)
-            "Corrida en E" -> corridaDecrypt(text)
-            "Paquidermo 0" -> paquidermoDecrypt(text, 0)
-            "Paquidermo 1" -> paquidermoDecrypt(text, 1)
+            "Murciélago" -> {
+                val type = option.toIntOrNull() ?: 0
+                murcielagoDecrypt(text, type)
+            }
+            "Paquidermo" -> {
+                val type = option.toIntOrNull() ?: 0
+                paquidermoDecrypt(text, type)
+            }
+            "Corrida" -> corridaDecrypt(text, option)
             "Araucano" -> araucanoDecrypt(text)
             "Superamigos" -> superamigosDecrypt(text)
             "Vocalica" -> vocalicaDecrypt(text)
@@ -46,11 +54,11 @@ object Encryptor {
     )
 
     private fun palefinoEncrypt(text: String): String =
-        text.map { palefinoDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { palefinoDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
 
     private fun palefinoDecrypt(text: String): String = palefinoEncrypt(text)
 
-    // ---- Murciélago 0----
+    // ---- Murciélago ----
     private val murcielago0 = mapOf(
         'm' to '0', 'u' to '1', 'r' to '2', 'c' to '3', 'i' to '4',
         'e' to '5', 'l' to '6', 'a' to '7', 'g' to '8', 'o' to '9',
@@ -66,23 +74,54 @@ object Encryptor {
 
     private fun murcielagoEncrypt(text: String, type: Int): String {
         val dict = if (type == 0) murcielago0 else murcielago1
-        return text.map { dict[it.lowercaseChar()] ?: it }.joinToString("")
+        return text.map { dict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     }
 
     private fun murcielagoDecrypt(text: String, type: Int): String {
         val dict = if (type == 0) murcielago0 else murcielago1
         val inv = dict.entries.associate { (k, v) -> v to k }
-        return text.map { inv[it] ?: it }.joinToString("")
+        return text.map { inv[it] ?: it }.joinToString("") { it.toString() }
     }
 
-    // ---- Corrida en E ---- (shift +4 Caesar)
-    private val abc = ('a'..'z').toList()
-    private val corridaDict = abc.mapIndexed { i, c -> c to abc[(i + 4) % 26] }.toMap()
-    private val invCorridaDict = corridaDict.entries.associate { (k, v) -> v to k }
-    private fun corridaEncrypt(text: String) =
-        text.map { corridaDict[it.lowercaseChar()] ?: it }.joinToString("")
-    private fun corridaDecrypt(text: String) =
-        text.map { invCorridaDict[it.lowercaseChar()] ?: it }.joinToString("")
+    // ---- Corrida ---- (Cifrado César configurable por letra)
+    private val abc = listOf(
+        'a','b','c','d','e','f','g','h','i','j','k','l','m','n','ñ','o','p','q','r','s','t','u','v','w','x','y','z'
+    )
+
+
+
+    private fun getShift(letter: String): Int {
+        val first = letter.trim().ifEmpty { "E" }[0]
+        val lower = first.toLowerCase()
+        return abc.indexOf(lower).takeIf { it >= 0 } ?: 4 // por defecto E -> 4
+    }
+
+    private fun corridaEncrypt(text: String, letter: String): String {
+        val shift = getShift(letter)
+        return text.map { ch ->
+            val lower = ch.lowercaseChar()
+            if (lower in abc) {
+                val isUpper = ch.isUpperCase()
+                val idx = abc.indexOf(lower)
+                val shifted = abc[(idx + shift) % abc.size]
+                if (isUpper) shifted.uppercaseChar() else shifted
+            } else ch
+        }.joinToString("")
+    }
+
+    private fun corridaDecrypt(text: String, letter: String): String {
+        val shift = getShift(letter)
+        return text.map { ch ->
+            val lower = ch.lowercaseChar()
+            if (lower in abc) {
+                val isUpper = ch.isUpperCase()
+                val idx = abc.indexOf(lower)
+                val shifted = abc[(idx - shift + abc.size) % abc.size]
+                if (isUpper) shifted.uppercaseChar() else shifted
+            } else ch
+        }.joinToString("")
+    }
+
 
     // ---- Paquidermo ----
     private val paquidermo0 = mapOf(
@@ -104,13 +143,13 @@ object Encryptor {
 
     private fun paquidermoEncrypt(text: String, type: Int): String {
         val dict = if (type == 0) paquidermo0 else paquidermo1
-        return text.map { dict[it.lowercaseChar()] ?: it }.joinToString("")
+        return text.map { dict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     }
 
     private fun paquidermoDecrypt(text: String, type: Int): String {
         val dict = if (type == 0) paquidermo0 else paquidermo1
         val inv = dict.entries.associate { (k, v) -> v to k }
-        return text.map { inv[it] ?: it }.joinToString("")
+        return text.map { inv[it] ?: it }.joinToString("") { it.toString() }
     }
 
     // ---- Araucano ----
@@ -120,9 +159,9 @@ object Encryptor {
     )
     private val invAraucano = araucanoDict.entries.associate { (k, v) -> v to k }
     private fun araucanoEncrypt(text: String) =
-        text.map { araucanoDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { araucanoDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     private fun araucanoDecrypt(text: String) =
-        text.map { invAraucano[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { invAraucano[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
 
     // ---- Superamigos ----
     private val superamigosDict = mapOf(
@@ -131,9 +170,9 @@ object Encryptor {
     )
     private val invSuperamigos = superamigosDict.entries.associate { (k, v) -> v to k }
     private fun superamigosEncrypt(text: String) =
-        text.map { superamigosDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { superamigosDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     private fun superamigosDecrypt(text: String) =
-        text.map { invSuperamigos[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { invSuperamigos[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
 
     // ---- Vocalica ----
     private val vocalicaDict = mapOf(
@@ -142,17 +181,17 @@ object Encryptor {
     )
     private val invVocalica = vocalicaDict.entries.associate { (k, v) -> v to k }
     private fun vocalicaEncrypt(text: String) =
-        text.map { vocalicaDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { vocalicaDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     private fun vocalicaDecrypt(text: String) =
-        text.map { invVocalica[it] ?: it }.joinToString("")
+        text.map { invVocalica[it] ?: it }.joinToString("") { it.toString() }
 
     // ---- Idioma X ----
     private val idiomaXDict = mapOf('a' to 'u', 'e' to 'o', 'i' to 'i', 'o' to 'e', 'u' to 'a')
     private val invIdiomaX = idiomaXDict.entries.associate { (k, v) -> v to k }
     private fun idiomaXEncrypt(text: String) =
-        text.map { idiomaXDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { idiomaXDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     private fun idiomaXDecrypt(text: String) =
-        text.map { invIdiomaX[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { invIdiomaX[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
 
     // ---- Dame tu pico ----
     private val dameDict = mapOf(
@@ -161,7 +200,7 @@ object Encryptor {
         'c' to 'o', 'o' to 'c'
     )
     private fun dameTuPicoEncrypt(text: String) =
-        text.map { dameDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { dameDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     private fun dameTuPicoDecrypt(text: String) = dameTuPicoEncrypt(text)
 
     // ---- Karlina Betfuse ----
@@ -176,8 +215,28 @@ object Encryptor {
     private val karlinaDict: Map<Char, Char> =
         (karlinaPairs + karlinaPairs.map { (a, b) -> b to a }).toMap()
     private fun karlinaEncrypt(text: String) =
-        text.map { karlinaDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { karlinaDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
     private fun karlinaDecrypt(text: String) =
-        text.map { karlinaDict[it.lowercaseChar()] ?: it }.joinToString("")
+        text.map { karlinaDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
 
+    // ---- Morse ----
+    private val morseDict = mapOf(
+        'a' to ".-", 'b' to "-...", 'c' to "-.-.", 'd' to "-..",
+        'e' to ".", 'f' to "..-.", 'g' to "--.", 'h' to "....",
+        'i' to "..", 'j' to ".---", 'k' to "-.-", 'l' to ".-..",
+        'm' to "--", 'n' to "-.", 'ñ' to "--.--", 'o' to "---",
+        'p' to ".--.", 'q' to "--.-", 'r' to ".-.", 's' to "...",
+        't' to "-", 'u' to "..-", 'v' to "...-", 'w' to ".--",
+        'x' to "-..-", 'y' to "-.--", 'z' to "--..",
+        '0' to "-----", '1' to ".----", '2' to "..---",
+        '3' to "...--", '4' to "....-", '5' to ".....",
+        '6' to "-....", '7' to "--...", '8' to "---..", '9' to "----."
+    )
+    private val invMorseDict = morseDict.entries.associate { (k, v) -> v to k }
+
+    private fun morseEncrypt(text: String) =
+        text.lowercase().mapNotNull { ch -> morseDict[ch] ?: if (ch==' ') "/" else null }.joinToString(" ")
+
+    private fun morseDecrypt(text: String) =
+        text.split(" ").mapNotNull { code -> if (code=="/") " " else invMorseDict[code] }.joinToString("")
 }
