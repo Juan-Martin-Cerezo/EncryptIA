@@ -20,7 +20,7 @@ object Encryptor {
             "Idioma X" -> idiomaXEncrypt(text)
             "Dame tu pico" -> dameTuPicoEncrypt(text)
             "Morse" -> morseEncrypt(text, option)
-                "Karlina Betfuse" -> karlinaEncrypt(text)
+            "Karlina Betfuse" -> karlinaEncrypt(text)
             else -> text
         }
     }
@@ -43,7 +43,7 @@ object Encryptor {
             "Idioma X" -> idiomaXDecrypt(text)
             "Dame tu pico" -> dameTuPicoDecrypt(text)
             "Morse" -> morseDecrypt(text, option)
-                "Karlina Betfuse" -> karlinaDecrypt(text)
+            "Karlina Betfuse" -> karlinaDecrypt(text)
             else -> text
         }
     }
@@ -56,7 +56,10 @@ object Encryptor {
     )
 
     private fun palefinoEncrypt(text: String): String =
-        text.map { palefinoDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = palefinoDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
 
     private fun palefinoDecrypt(text: String): String = palefinoEncrypt(text)
 
@@ -76,26 +79,30 @@ object Encryptor {
 
     private fun murcielagoEncrypt(text: String, type: Int): String {
         val dict = if (type == 0) murcielago0 else murcielago1
-        return text.map { dict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        return text.map { ch ->
+            val mapped = dict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase() && mapped.isLetter()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
     }
 
     private fun murcielagoDecrypt(text: String, type: Int): String {
         val dict = if (type == 0) murcielago0 else murcielago1
         val inv = dict.entries.associate { (k, v) -> v to k }
-        return text.map { inv[it] ?: it }.joinToString("") { it.toString() }
+        return text.map { ch ->
+            val mapped = inv[ch] ?: ch
+            if (ch.isUpperCase() && mapped.isLetter()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
     }
 
-    // ---- Corrida ---- (Cifrado César configurable por letra)
+    // ---- Corrida ----
     private val abc = listOf(
         'a','b','c','d','e','f','g','h','i','j','k','l','m','n','ñ','o','p','q','r','s','t','u','v','w','x','y','z'
     )
 
-
-
     private fun getShift(letter: String): Int {
         val first = letter.trim().ifEmpty { "E" }[0]
-        val lower = first.toLowerCase()
-        return abc.indexOf(lower).takeIf { it >= 0 } ?: 4 // por defecto E -> 4
+        val lower = first.lowercaseChar()
+        return abc.indexOf(lower).takeIf { it >= 0 } ?: 4
     }
 
     private fun corridaEncrypt(text: String, letter: String): String {
@@ -103,10 +110,9 @@ object Encryptor {
         return text.map { ch ->
             val lower = ch.lowercaseChar()
             if (lower in abc) {
-                val isUpper = ch.isUpperCase()
                 val idx = abc.indexOf(lower)
                 val shifted = abc[(idx + shift) % abc.size]
-                if (isUpper) shifted.uppercaseChar() else shifted
+                if (ch.isUpperCase()) shifted.uppercaseChar() else shifted
             } else ch
         }.joinToString("")
     }
@@ -116,14 +122,12 @@ object Encryptor {
         return text.map { ch ->
             val lower = ch.lowercaseChar()
             if (lower in abc) {
-                val isUpper = ch.isUpperCase()
                 val idx = abc.indexOf(lower)
                 val shifted = abc[(idx - shift + abc.size) % abc.size]
-                if (isUpper) shifted.uppercaseChar() else shifted
+                if (ch.isUpperCase()) shifted.uppercaseChar() else shifted
             } else ch
         }.joinToString("")
     }
-
 
     // ---- Paquidermo ----
     private val paquidermo0 = mapOf(
@@ -145,13 +149,19 @@ object Encryptor {
 
     private fun paquidermoEncrypt(text: String, type: Int): String {
         val dict = if (type == 0) paquidermo0 else paquidermo1
-        return text.map { dict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        return text.map { ch ->
+            val mapped = dict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase() && mapped.isLetter()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
     }
 
     private fun paquidermoDecrypt(text: String, type: Int): String {
         val dict = if (type == 0) paquidermo0 else paquidermo1
         val inv = dict.entries.associate { (k, v) -> v to k }
-        return text.map { inv[it] ?: it }.joinToString("") { it.toString() }
+        return text.map { ch ->
+            val mapped = inv[ch] ?: ch
+            if (ch.isUpperCase() && mapped.isLetter()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
     }
 
     // ---- Araucano ----
@@ -161,9 +171,16 @@ object Encryptor {
     )
     private val invAraucano = araucanoDict.entries.associate { (k, v) -> v to k }
     private fun araucanoEncrypt(text: String) =
-        text.map { araucanoDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = araucanoDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
+
     private fun araucanoDecrypt(text: String) =
-        text.map { invAraucano[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = invAraucano[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
 
     // ---- Superamigos ----
     private val superamigosDict = mapOf(
@@ -172,9 +189,16 @@ object Encryptor {
     )
     private val invSuperamigos = superamigosDict.entries.associate { (k, v) -> v to k }
     private fun superamigosEncrypt(text: String) =
-        text.map { superamigosDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = superamigosDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
+
     private fun superamigosDecrypt(text: String) =
-        text.map { invSuperamigos[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = invSuperamigos[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
 
     // ---- Vocalica ----
     private val vocalicaDict = mapOf(
@@ -183,17 +207,31 @@ object Encryptor {
     )
     private val invVocalica = vocalicaDict.entries.associate { (k, v) -> v to k }
     private fun vocalicaEncrypt(text: String) =
-        text.map { vocalicaDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = vocalicaDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase() && mapped.isLetter()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
+
     private fun vocalicaDecrypt(text: String) =
-        text.map { invVocalica[it] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = invVocalica[ch] ?: ch
+            if (ch.isUpperCase() && mapped.isLetter()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
 
     // ---- Idioma X ----
     private val idiomaXDict = mapOf('a' to 'u', 'e' to 'o', 'i' to 'i', 'o' to 'e', 'u' to 'a')
     private val invIdiomaX = idiomaXDict.entries.associate { (k, v) -> v to k }
     private fun idiomaXEncrypt(text: String) =
-        text.map { idiomaXDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = idiomaXDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
+
     private fun idiomaXDecrypt(text: String) =
-        text.map { invIdiomaX[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = invIdiomaX[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
 
     // ---- Dame tu pico ----
     private val dameDict = mapOf(
@@ -202,7 +240,11 @@ object Encryptor {
         'c' to 'o', 'o' to 'c'
     )
     private fun dameTuPicoEncrypt(text: String) =
-        text.map { dameDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = dameDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
+
     private fun dameTuPicoDecrypt(text: String) = dameTuPicoEncrypt(text)
 
     // ---- Karlina Betfuse ----
@@ -217,9 +259,16 @@ object Encryptor {
     private val karlinaDict: Map<Char, Char> =
         (karlinaPairs + karlinaPairs.map { (a, b) -> b to a }).toMap()
     private fun karlinaEncrypt(text: String) =
-        text.map { karlinaDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = karlinaDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
+
     private fun karlinaDecrypt(text: String) =
-        text.map { karlinaDict[it.toLowerCase()] ?: it }.joinToString("") { it.toString() }
+        text.map { ch ->
+            val mapped = karlinaDict[ch.lowercaseChar()] ?: ch
+            if (ch.isUpperCase()) mapped.uppercaseChar() else mapped
+        }.joinToString("")
 
     // ---- Morse ----
     private val morseDict = mapOf(
