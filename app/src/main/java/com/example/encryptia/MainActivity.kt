@@ -38,18 +38,41 @@ class MainActivity : ComponentActivity() {
         setContent {
             var showBook by remember { mutableStateOf(false) }
             var selectedInfoKey by remember { mutableStateOf<String?>(null) }
+            var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
 
             if (showBook) {
                 EncryptBook(
-                    onBack = { showBook = false; selectedInfoKey = null },
-                    onSelectKey = { key ->
-                        selectedInfoKey = if (key.isNotEmpty()) key else null
+                    onBack = {
+                        showBook = false
+                        selectedInfoKey = null
                     },
-                    selectedKey = selectedInfoKey
+                    onSelectKey = { key: String?, usarClave: Boolean ->
+                        if (usarClave && key != null) {
+                            // Usar clave y volver a la pantalla principal
+                            selectedKey = key
+                            showBook = false
+                            selectedInfoKey = null
+                        } else {
+                            // Solo mostrar info de la clave en detalle
+                            selectedInfoKey = key
+                        }
+                    },
+                    selectedKey = selectedInfoKey,
+                    onOpenBook = {
+                        selectedInfoKey = null
+                        showBook = true
+                    }
+
                 )
             } else {
                 EncryptorApp(
-                    onOpenBook = { showBook = true }
+                    selectedKey = selectedKey,
+                    onChangeKey = { newKey -> selectedKey = newKey },
+                    onOpenBook = {
+                        // Al abrir el libro desde Main, siempre mostrar la lista
+                        selectedInfoKey = null
+                        showBook = true
+                    }
                 )
             }
         }
@@ -62,17 +85,21 @@ fun PreviewEncryptorApp() {
     EncryptorApp()
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EncryptorApp(onOpenBook: () -> Unit = {}) {
+fun EncryptorApp(
+    selectedKey: String = "Seleccioná una clave",
+    onChangeKey: (String) -> Unit = {},
+    onOpenBook: () -> Unit = {}
+) {
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
     var expandedKey by remember { mutableStateOf(false) }
 
     var selectedOption by remember { mutableStateOf("-") }
     var expandedOption by remember { mutableStateOf(false) }
 
-    var encryptMode by remember { mutableStateOf(true) } // true = Español → Encriptado
+    var encryptMode by remember { mutableStateOf(true) }
 
     val keys = listOf(
         "Palérinofu", "Murciélago", "Corrida",
@@ -95,13 +122,9 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                 .addOnSuccessListener { visionText ->
                     inputText = TextFieldValue(visionText.text)
                 }
-                .addOnFailureListener {
-                    // Aquí podrías mostrar un Toast o similar
-                }
         }
     }
 
-    // --- Colores ---
     val bgColor = Color(0xFF121212)
     val surfaceColor = Color(0xFF1E1E1E)
     val accentColor = Color(0xFFBB86FC)
@@ -109,7 +132,6 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
     val secondaryText = Color(0xFFB0B0B0)
     val resultColor = Color(0xFF03DAC6)
 
-    // --- Calculamos outputText derivado del estado ---
     val outputText = remember(inputText.text, selectedKey, selectedOption, encryptMode) {
         if (selectedKey == "Seleccioná una clave") ""
         else if (encryptMode) Encryptor.encrypt(inputText.text, selectedKey, selectedOption)
@@ -126,7 +148,6 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 📘 Botón para abrir el libro de claves
                 IconButton(
                     onClick = onOpenBook,
                     modifier = Modifier
@@ -134,13 +155,12 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                         .background(accentColor, CircleShape)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_book), // usa un ícono de "info" o "book"
+                        painter = painterResource(id = R.drawable.ic_book),
                         contentDescription = "Listado de claves",
                         modifier = Modifier.size(32.dp)
                     )
                 }
 
-                // 📷 Botón de cámara
                 IconButton(
                     onClick = { cameraLauncher.launch(null) },
                     modifier = Modifier
@@ -172,7 +192,6 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Clave
                 ExposedDropdownMenuBox(
                     expanded = expandedKey,
                     onExpandedChange = { expandedKey = !expandedKey },
@@ -201,7 +220,7 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                             DropdownMenuItem(
                                 text = { Text(key) },
                                 onClick = {
-                                    selectedKey = key
+                                    onChangeKey(key)
                                     expandedKey = false
                                     encryptMode = true
                                     selectedOption = when (key) {
@@ -221,7 +240,6 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                     else -> listOf("-")
                 }
 
-                // Tipo
                 ExposedDropdownMenuBox(
                     expanded = expandedOption,
                     onExpandedChange = { if (optionList.size > 1) expandedOption = !expandedOption },
@@ -265,7 +283,6 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                 }
             }
 
-            // --- Cuadro superior ---
             Text(
                 text = if (encryptMode) "Español" else "Encriptado",
                 color = secondaryText,
@@ -288,10 +305,8 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                 )
             )
 
-            // --- Botón de intercambio ---
             IconButton(
                 onClick = {
-                    val temp = inputText.text
                     inputText = TextFieldValue(outputText)
                     encryptMode = !encryptMode
                 },
@@ -306,7 +321,6 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
                 )
             }
 
-            // --- Cuadro inferior ---
             Text(
                 text = if (encryptMode) "Encriptado" else "Español",
                 color = secondaryText,
@@ -330,8 +344,7 @@ fun EncryptorApp(onOpenBook: () -> Unit = {}) {
 
                 IconButton(
                     onClick = {
-                        val clipboard =
-                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("resultado", outputText)
                         clipboard.setPrimaryClip(clip)
                     },
