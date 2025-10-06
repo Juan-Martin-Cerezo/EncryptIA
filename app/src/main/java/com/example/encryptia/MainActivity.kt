@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.mlkit.vision.common.InputImage
@@ -37,61 +36,61 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             var showBook by remember { mutableStateOf(false) }
+            var showCompass by remember { mutableStateOf(false) }
             var selectedInfoKey by remember { mutableStateOf<String?>(null) }
             var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
 
-            if (showBook) {
-                EncryptBook(
-                    onBack = {
-                        showBook = false
-                        selectedInfoKey = null
-                    },
-                    onSelectKey = { key: String?, usarClave: Boolean ->
-                        if (usarClave && key != null) {
-                            // Usar clave y volver a la pantalla principal
-                            selectedKey = key
+            when {
+                showBook -> {
+                    EncryptBook(
+                        onBack = {
                             showBook = false
                             selectedInfoKey = null
-                        } else {
-                            // Solo mostrar info de la clave en detalle
-                            selectedInfoKey = key
+                        },
+                        onSelectKey = { key: String?, usarClave: Boolean ->
+                            if (usarClave && key != null) {
+                                selectedKey = key
+                                showBook = false
+                                selectedInfoKey = null
+                            } else {
+                                selectedInfoKey = key
+                            }
+                        },
+                        selectedKey = selectedInfoKey,
+                        onOpenBook = {
+                            selectedInfoKey = null
+                            showBook = true
                         }
-                    },
-                    selectedKey = selectedInfoKey,
-                    onOpenBook = {
-                        selectedInfoKey = null
-                        showBook = true
-                    }
+                    )
+                }
 
-                )
-            } else {
-                EncryptorApp(
-                    selectedKey = selectedKey,
-                    onChangeKey = { newKey -> selectedKey = newKey },
-                    onOpenBook = {
-                        // Al abrir el libro desde Main, siempre mostrar la lista
-                        selectedInfoKey = null
-                        showBook = true
-                    }
-                )
+                showCompass -> {
+                    EncryptoCompass(onBack = { showCompass = false })
+                }
+
+                else -> {
+                    EncryptorApp(
+                        selectedKey = selectedKey,
+                        onChangeKey = { newKey -> selectedKey = newKey },
+                        onOpenBook = {
+                            selectedInfoKey = null
+                            showBook = true
+                        },
+                        onOpenCompass = { showCompass = true }
+                    )
+                }
             }
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewEncryptorApp() {
-    EncryptorApp()
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncryptorApp(
     selectedKey: String = "Seleccioná una clave",
     onChangeKey: (String) -> Unit = {},
-    onOpenBook: () -> Unit = {}
+    onOpenBook: () -> Unit = {},
+    onOpenCompass: () -> Unit = {}
 ) {
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
     var expandedKey by remember { mutableStateOf(false) }
@@ -149,6 +148,7 @@ fun EncryptorApp(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // 📘 Botón Libro
                 IconButton(
                     onClick = onOpenBook,
                     modifier = Modifier
@@ -162,6 +162,21 @@ fun EncryptorApp(
                     )
                 }
 
+                // 🧭 Nuevo botón Compass
+                IconButton(
+                    onClick = onOpenCompass,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(accentColor, CircleShape)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_compass),
+                        contentDescription = "EncryptoCompass",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                // 📷 Botón Cámara
                 IconButton(
                     onClick = { cameraLauncher.launch(null) },
                     modifier = Modifier
@@ -347,7 +362,8 @@ fun EncryptorApp(
 
                 IconButton(
                     onClick = {
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("resultado", outputText)
                         clipboard.setPrimaryClip(clip)
                     },
