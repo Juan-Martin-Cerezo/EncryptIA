@@ -252,7 +252,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_book),
                         contentDescription = "Listado de claves",
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(48.dp)
                     )
                 }
 
@@ -266,7 +266,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_compass),
                         contentDescription = "EncryptoCompass",
-                        modifier = Modifier.size(50.dp)
+                        modifier = Modifier.size(58.dp)
                     )
                 }
 
@@ -280,7 +280,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_camera),
                         contentDescription = "Escanear texto",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(34.dp)
                     )
                 }
             }
