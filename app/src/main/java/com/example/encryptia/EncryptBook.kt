@@ -31,24 +31,43 @@ fun EncryptBook(
     onOpenBook: () -> Unit
 ) {
     val allKeys = listOf(
-        "Palérinofu", "Murciélago", "Corrida",
-        "Paquidermo", "Araucano", "Superamigos", "Vocalica",
-        "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
+        "Abecedárica",
+        "Araucano",
+        "Autocorrida por inicial",
+        "Autocorrida por palabra",
+        "Corrida",
+        "Corrida intrínseca compuesta",
+        "Corrida intrínseca simple",
+        "Dame tu pico",
+        "Fechada",
+        "Idioma X",
+        "Karlina Betfuse",
+        "Morse",
+        "Murciélago",
+        "Palérinofu",
+        "Paquidermo",
+        "Superamigos",
+        "Vocalica"
     ).sorted()
 
-    // Etiquetas por clave (2 random por cada una)
     val keyTags = mapOf(
-        "Palérinofu" to listOf("Numérica", "Alfabética"),
-        "Murciélago" to listOf("Parcial", "Numérica"),
-        "Corrida" to listOf("Alfabética", "Parcial"),
-        "Paquidermo" to listOf("Numérica", "Alfabética"),
-        "Araucano" to listOf("Alfabética", "Parcial"),
-        "Superamigos" to listOf("Parcial", "Numérica"),
-        "Vocalica" to listOf("Alfabética", "Parcial"),
-        "Idioma X" to listOf("Numérica", "Parcial"),
-        "Dame tu pico" to listOf("Parcial", "Alfabética"),
-        "Karlina Betfuse" to listOf("Alfabética", "Numérica"),
-        "Morse" to listOf("Numérica", "Parcial")
+        "Abecedárica" to listOf("Alfabética"),
+        "Araucano" to listOf("Parcial"),
+        "Autocorrida por inicial" to listOf("Alfabética"),
+        "Autocorrida por palabra" to listOf("Alfabética"),
+        "Corrida" to listOf("Alfabética"),
+        "Corrida intrínseca compuesta" to listOf("Alfabética"),
+        "Corrida intrínseca simple" to listOf("Alfabética"),
+        "Dame tu pico" to listOf("Parcial"),
+        "Fechada" to listOf("Alfabética"),
+        "Idioma X" to listOf("Parcial"),
+        "Karlina Betfuse" to listOf("Parcial"),
+        "Morse" to listOf("Alfabética"),
+        "Murciélago" to listOf("Parcial","Numérica"),
+        "Palérinofu" to listOf("Parcial"),
+        "Paquidermo" to listOf("Parcial","Numérica"),
+        "Superamigos" to listOf("Parcial"),
+        "Vocalica" to listOf("Parcial", "Numérica")
     )
 
     var searchQuery by remember { mutableStateOf("") }
@@ -66,7 +85,14 @@ fun EncryptBook(
         val matchesSearch = key.contains(searchQuery, ignoreCase = true)
         val matchesFilter = when (selectedFilter) {
             "Todas" -> true
-            else -> keyTags[key]?.contains(selectedFilter.removeSuffix("s")) ?: true
+            else -> {
+                val singularTag = if (selectedFilter.endsWith("es")) {
+                    selectedFilter.removeSuffix("es")
+                } else {
+                    selectedFilter.removeSuffix("s")
+                }
+                keyTags[key]?.contains(singularTag) ?: true
+            }
         }
         matchesSearch && matchesFilter
     }
@@ -210,7 +236,7 @@ fun EncryptBook(
                                 contentDescription = "Ver etiquetas",
                                 modifier = Modifier
                                     .size(28.dp)
-                                    .offset(x = (-12).dp) // Move left by 8dp (negative moves left, positive moves right)
+                                    .offset(x = (-12).dp)
                                     .clickable { showTags = true }
                             )
                         }
@@ -243,66 +269,20 @@ fun EncryptBook(
                     .verticalScroll(rememberScrollState())
             ) {
                 when (selectedKey) {
-                    "Palérinofu" -> {
+                    "Abecedárica" -> {
                         Text(
-                            "Clave Palérinofu",
+                            "Clave Abecedárica",
                             color = Color.White,
                             fontSize = 22.sp,
                             modifier = Modifier.padding(16.dp)
                         )
                         Text(
-                            "Aquí va la explicación detallada de la clave Palérinofu...",
+                            "Aquí va la explicación detallada de la clave Abecedárica...",
                             color = Color.White,
                             fontSize = 18.sp,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
-
-                    "Murciélago" -> {
-                        Text(
-                            "Clave Murciélago",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Murciélago...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    "Corrida" -> {
-                        Text(
-                            "Clave Corrida",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Corrida...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    "Paquidermo" -> {
-                        Text(
-                            "Clave Paquidermo",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Paquidermo...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
                     "Araucano" -> {
                         Text(
                             "Clave Araucano",
@@ -317,7 +297,188 @@ fun EncryptBook(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
-
+                    "Autocorrida por inicial" -> {
+                        Text(
+                            "Clave Autocorrida por inicial",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Autocorrida por inicial...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Autocorrida por palabra" -> {
+                        Text(
+                            "Clave Autocorrida por palabra",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Autocorrida por palabra...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Corrida" -> {
+                        Text(
+                            "Clave Corrida",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Corrida...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Corrida intrínseca compuesta" -> {
+                        Text(
+                            "Clave Corrida intrínseca compuesta",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Corrida intrínseca compuesta...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Corrida intrínseca simple" -> {
+                        Text(
+                            "Clave Corrida intrínseca simple",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Corrida intrínseca simple...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Dame tu pico" -> {
+                        Text(
+                            "Clave Dame tu pico",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Dame tu pico...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Fechada" -> {
+                        Text(
+                            "Clave Fechada",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Fechada...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Idioma X" -> {
+                        Text(
+                            "Clave Idioma X",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Idioma X...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Karlina Betfuse" -> {
+                        Text(
+                            "Clave Karlina Betfuse",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Karlina Betfuse...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Morse" -> {
+                        Text(
+                            "Clave Morse",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Morse...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Murciélago" -> {
+                        Text(
+                            "Clave Murciélago",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Murciélago...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Palérinofu" -> {
+                        Text(
+                            "Clave Palérinofu",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Palérinofu...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                    "Paquidermo" -> {
+                        Text(
+                            "Clave Paquidermo",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            "Aquí va la explicación detallada de la clave Paquidermo...",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
                     "Superamigos" -> {
                         Text(
                             "Clave Superamigos",
@@ -332,7 +493,6 @@ fun EncryptBook(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
-
                     "Vocalica" -> {
                         Text(
                             "Clave Vocalica",
@@ -348,86 +508,44 @@ fun EncryptBook(
                         )
                     }
 
-                    "Idioma X" -> {
+                    else -> {
                         Text(
-                            "Clave Idioma X",
+                            "Clave no encontrada",
                             color = Color.White,
                             fontSize = 22.sp,
                             modifier = Modifier.padding(16.dp)
                         )
                         Text(
-                            "Aquí va la explicación detallada de la clave Idioma X...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    "Dame tu pico" -> {
-                        Text(
-                            "Clave Dame tu pico",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Dame tu pico...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    "Karlina Betfuse" -> {
-                        Text(
-                            "Clave Karlina Betfuse",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Karlina Betfuse...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    "Morse" -> {
-                        Text(
-                            "Clave Morse",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Morse...",
+                            "La descripción para esta clave aún no ha sido añadida.",
                             color = Color.White,
                             fontSize = 18.sp,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(70.dp))
             }
-            // Diálogo de etiquetas
+
             if (showTags) {
                 AlertDialog(
                     onDismissRequest = { showTags = false },
-                    confirmButton = {
-                        TextButton(onClick = { showTags = false }) {
-                            Text("Cerrar", color = accentColor)
-                        }
-                    },
-                    title = { Text("Etiquetas de ${selectedKey}", color = Color.White) },
+                    title = { Text("Etiquetas para " + (selectedKey ?: ""), color = Color.White) },
                     text = {
                         Column {
                             keyTags[selectedKey]?.forEach { tag ->
-                                Text("• $tag", color = Color.LightGray, fontSize = 16.sp)
+                                Text(" - $tag", color = Color.LightGray)
                             }
                         }
                     },
-                    containerColor = Color(0xFF1E1E1E)
+                    confirmButton = {
+                        Button(
+                            onClick = { showTags = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = accentColor)
+                        ) {
+                            Text("Cerrar", color = Color.Black)
+                        }
+                    },
+                    containerColor = surfaceColor
                 )
             }
         }

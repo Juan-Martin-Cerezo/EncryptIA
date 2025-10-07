@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -95,6 +96,10 @@ class MainActivity : ComponentActivity() {
 
             when {
                 showBook -> {
+                    BackHandler {
+                        showBook = false
+                        selectedInfoKey = null
+                    }
                     EncryptBook(
                         onBack = {
                             showBook = false
@@ -118,6 +123,9 @@ class MainActivity : ComponentActivity() {
                 }
 
                 showCompass -> {
+                    BackHandler {
+                        showCompass = false
+                    }
                     EncryptoCompass(
                         onBack = { showCompass = false },
                         classifier = classifier,
@@ -258,7 +266,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_compass),
                         contentDescription = "EncryptoCompass",
-                        modifier = Modifier.size(44.dp)
+                        modifier = Modifier.size(50.dp)
                     )
                 }
 
@@ -316,11 +324,12 @@ fun EncryptorApp(
 
                     ExposedDropdownMenu(
                         expanded = expandedKey,
-                        onDismissRequest = { expandedKey = false }
+                        onDismissRequest = { expandedKey = false },
+                        modifier = Modifier.background(surfaceColor)
                     ) {
                         keys.forEach { key ->
                             DropdownMenuItem(
-                                text = { Text(key) },
+                                text = { Text(key, color = primaryText) },
                                 onClick = {
                                     onChangeKey(key)
                                     expandedKey = false
@@ -392,11 +401,12 @@ fun EncryptorApp(
                         if (optionList.size > 1) {
                             ExposedDropdownMenu(
                                 expanded = expandedOption,
-                                onDismissRequest = { expandedOption = false }
+                                onDismissRequest = { expandedOption = false },
+                                modifier = Modifier.background(surfaceColor)
                             ) {
                                 optionList.forEach { opt ->
                                     DropdownMenuItem(
-                                        text = { Text(opt) },
+                                        text = { Text(opt, color = primaryText) },
                                         onClick = {
                                             selectedOption = opt
                                             expandedOption = false
@@ -444,7 +454,8 @@ fun EncryptorApp(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow),
-                    contentDescription = "Intercambiar idioma"
+                    contentDescription = "Intercambiar idioma",
+                    modifier = Modifier.size(44.dp)
                 )
             }
 
