@@ -12,8 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun EncryptoCompass(
     onBack: () -> Unit,
-    classifier: EncryptionClassifier
+    classifier: EncryptionClassifier,
+    onApplyKey: (String, String) -> Unit
 ) {
     val bgColor = Color(0xFF121212)
     val surfaceColor = Color(0xFF1E1E1E)
@@ -91,12 +92,32 @@ fun EncryptoCompass(
             if (results.isEmpty() && !loading) {
                 Text("Esperando texto o predicción...", color = textColor)
             } else {
-                results.forEachIndexed { index, (method, prob) ->
-                    Text(
-                        text = "${index + 1}. $method → ${(prob * 100).toInt()}%",
-                        color = Color(0xFF03DAC6),
-                        fontSize = 16.sp
-                    )
+                results.take(3).forEachIndexed { index, (method, prob) ->
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${index + 1}. $method",
+                            color = Color(0xFF03DAC6),
+                            fontSize = 16.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "%.2f%%".format(prob * 100),
+                            color = Color(0xFF03DAC6),
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.End
+                        )
+                    }
+                }
+
+                if (results.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { onApplyKey(results.first().first, inputText) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = accentColor.copy(alpha = 0.8f))
+                    ) {
+                        Text("Usar ${results.first().first}")
+                    }
                 }
             }
         }

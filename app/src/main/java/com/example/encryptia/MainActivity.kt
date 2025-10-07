@@ -35,20 +35,25 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 class MainActivity : ComponentActivity() {
 
-    // Mantiene una sola instancia del modelo en memoria
     private lateinit var classifier: EncryptionClassifier
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Cargar el modelo TensorFlow Lite
         classifier = EncryptionClassifier(this)
 
         setContent {
+            val keys = listOf(
+                "Palérinofu", "Murciélago", "Corrida",
+                "Paquidermo", "Araucano", "Superamigos", "Vocalica",
+                "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
+            ).sorted()
+
             var showBook by remember { mutableStateOf(false) }
             var showCompass by remember { mutableStateOf(false) }
             var selectedInfoKey by remember { mutableStateOf<String?>(null) }
             var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
+            var inputText by remember { mutableStateOf(TextFieldValue("")) }
 
             when {
                 showBook -> {
@@ -75,10 +80,15 @@ class MainActivity : ComponentActivity() {
                 }
 
                 showCompass -> {
-                    // 🔗 Pasamos el modelo al Compass
                     EncryptoCompass(
                         onBack = { showCompass = false },
-                        classifier = classifier
+                        classifier = classifier,
+                        onApplyKey = { keyFromModel, text ->
+                            val matchingKey = keys.find { it.equals(keyFromModel, ignoreCase = true) }
+                            selectedKey = matchingKey ?: keyFromModel
+                            inputText = TextFieldValue(text)
+                            showCompass = false
+                        }
                     )
                 }
 
@@ -90,7 +100,10 @@ class MainActivity : ComponentActivity() {
                             selectedInfoKey = null
                             showBook = true
                         },
-                        onOpenCompass = { showCompass = true }
+                        onOpenCompass = { showCompass = true },
+                        inputText = inputText,
+                        onInputTextChange = { newText -> inputText = newText },
+                        keys = keys
                     )
                 }
             }
@@ -99,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        classifier.close() // Libera la memoria del modelo
+        classifier.close()
     }
 }
 
@@ -109,21 +122,17 @@ fun EncryptorApp(
     selectedKey: String = "Seleccioná una clave",
     onChangeKey: (String) -> Unit = {},
     onOpenBook: () -> Unit = {},
-    onOpenCompass: () -> Unit = {}
+    onOpenCompass: () -> Unit = {},
+    inputText: TextFieldValue,
+    onInputTextChange: (TextFieldValue) -> Unit,
+    keys: List<String>
 ) {
-    var inputText by remember { mutableStateOf(TextFieldValue("")) }
     var expandedKey by remember { mutableStateOf(false) }
 
     var selectedOption by remember { mutableStateOf("-") }
     var expandedOption by remember { mutableStateOf(false) }
 
     var encryptMode by remember { mutableStateOf(true) }
-
-    val keys = listOf(
-        "Palérinofu", "Murciélago", "Corrida",
-        "Paquidermo", "Araucano", "Superamigos", "Vocalica",
-        "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
-    ).sorted()
 
     val murcTypes = listOf("0", "1")
     val letters = ('A'..'N').map { it.toString() } + "Ñ" + ('O'..'Z').map { it.toString() }
@@ -143,7 +152,7 @@ fun EncryptorApp(
             val image = InputImage.fromBitmap(it, 0)
             recognizer?.process(image)
                 ?.addOnSuccessListener { visionText ->
-                    inputText = TextFieldValue(visionText.text)
+                    onInputTextChange(TextFieldValue(visionText.text))
                 }
         }
     }
@@ -181,11 +190,11 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_book),
                         contentDescription = "Listado de claves",
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
 
-                // 🧭 Botón Compass (IA)
+                // 🧭 Nuevo botón Compass
                 IconButton(
                     onClick = onOpenCompass,
                     modifier = Modifier
@@ -195,7 +204,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_compass),
                         contentDescription = "EncryptoCompass",
-                        modifier = Modifier.size(54.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
 
@@ -209,7 +218,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_camera),
                         contentDescription = "Escanear texto",
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
@@ -331,7 +340,7 @@ fun EncryptorApp(
             )
             TextField(
                 value = inputText,
-                onValueChange = { inputText = it },
+                onValueChange = { onInputTextChange(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 120.dp),
@@ -348,7 +357,7 @@ fun EncryptorApp(
 
             IconButton(
                 onClick = {
-                    inputText = TextFieldValue(outputText)
+                    onInputTextChange(TextFieldValue(outputText))
                     encryptMode = !encryptMode
                 },
                 modifier = Modifier
@@ -358,8 +367,7 @@ fun EncryptorApp(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow),
-                    contentDescription = "Intercambiar idioma",
-                    modifier = Modifier.size(44.dp)
+                    contentDescription = "Intercambiar idioma"
                 )
             }
 
@@ -407,5 +415,15 @@ fun EncryptorApp(
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    EncryptorApp()
+    val keys = listOf(
+        "Palérinofu", "Murciélago", "Corrida",
+        "Paquidermo", "Araucano", "Superamigos", "Vocalica",
+        "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
+    ).sorted()
+    var inputText by remember { mutableStateOf(TextFieldValue("")) }
+    EncryptorApp(
+        inputText = inputText,
+        onInputTextChange = { inputText = it },
+        keys = keys
+    )
 }
