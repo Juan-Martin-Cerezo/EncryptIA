@@ -122,8 +122,21 @@ class MainActivity : ComponentActivity() {
                         onBack = { showCompass = false },
                         classifier = classifier,
                         onApplyKey = { keyFromModel, text ->
-                            val matchingKey = keys.find { it.equals(keyFromModel, ignoreCase = true) }
-                            selectedKey = matchingKey ?: keyFromModel
+                            val uiKey = when (keyFromModel.lowercase()) {
+                                "araucano" -> "Araucano"
+                                "corrida" -> "Corrida"
+                                "dame" -> "Dame tu pico"
+                                "idiomax" -> "Idioma X"
+                                "karlina" -> "Karlina Betfuse"
+                                "morse" -> "Morse"
+                                "murcielago" -> "Murciélago"
+                                "palefino" -> "Palérinofu"
+                                "paquidermo" -> "Paquidermo"
+                                "superamigos" -> "Superamigos"
+                                "vocalica" -> "Vocalica"
+                                else -> keyFromModel // Fallback to the original model key
+                            }
+                            selectedKey = uiKey
                             inputText = TextFieldValue(text)
                             encryptMode = false // El texto es encriptado, así que vamos a desencriptar
                             showCompass = false

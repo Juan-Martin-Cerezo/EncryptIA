@@ -72,49 +72,89 @@ object Encryptor {
     }
 
     private fun corridaIntrinsecaSimpleEncrypt(text: String): String {
-        if (text.isEmpty()) return ""
         val result = StringBuilder()
-        result.append(text[0])
-        for (i in 1 until text.length) {
-            val prevChar = text[i - 1]
-            val shift = alphabetMap[prevChar.lowercaseChar()] ?: 0
-            result.append(shiftChar(text[i], shift))
+        var lastOriginalLetter: Char? = null
+
+        for (originalChar in text) {
+            if (!originalChar.isLetter()) {
+                result.append(originalChar)
+                continue
+            }
+
+            val encryptedChar = if (lastOriginalLetter == null) {
+                originalChar
+            } else {
+                val shift = alphabetMap[lastOriginalLetter.lowercaseChar()] ?: 0
+                shiftChar(originalChar, shift)
+            }
+            result.append(encryptedChar)
+            lastOriginalLetter = originalChar
         }
         return result.toString()
     }
 
     private fun corridaIntrinsecaSimpleDecrypt(text: String): String {
-        if (text.isEmpty()) return ""
         val result = StringBuilder()
-        result.append(text[0])
-        for (i in 1 until text.length) {
-            val prevCharOriginal = result[i - 1] // Usamos la letra original ya desencriptada
-            val shift = alphabetMap[prevCharOriginal.lowercaseChar()] ?: 0
-            result.append(shiftChar(text[i], shift, decrypt = true))
+        var lastDecryptedLetter: Char? = null
+
+        for (encryptedChar in text) {
+            if (!encryptedChar.isLetter()) {
+                result.append(encryptedChar)
+                continue
+            }
+
+            val decryptedChar = if (lastDecryptedLetter == null) {
+                encryptedChar
+            } else {
+                val shift = alphabetMap[lastDecryptedLetter.lowercaseChar()] ?: 0
+                shiftChar(encryptedChar, shift, decrypt = true)
+            }
+            result.append(decryptedChar)
+            lastDecryptedLetter = decryptedChar
         }
         return result.toString()
     }
 
     private fun corridaIntrinsecaCompuestaEncrypt(text: String): String {
-        if (text.isEmpty()) return ""
         val result = StringBuilder()
-        result.append(text[0])
-        for (i in 1 until text.length) {
-            val prevEncryptedChar = result[i - 1]
-            val shift = alphabetMap[prevEncryptedChar.lowercaseChar()] ?: 0
-            result.append(shiftChar(text[i], shift))
+        var lastEncryptedLetter: Char? = null
+
+        for (originalChar in text) {
+            if (!originalChar.isLetter()) {
+                result.append(originalChar)
+                continue
+            }
+
+            val encryptedChar = if (lastEncryptedLetter == null) {
+                originalChar
+            } else {
+                val shift = alphabetMap[lastEncryptedLetter.lowercaseChar()] ?: 0
+                shiftChar(originalChar, shift)
+            }
+            result.append(encryptedChar)
+            lastEncryptedLetter = encryptedChar
         }
         return result.toString()
     }
 
     private fun corridaIntrinsecaCompuestaDecrypt(text: String): String {
-        if (text.isEmpty()) return ""
         val result = StringBuilder()
-        result.append(text[0])
-        for (i in 1 until text.length) {
-            val prevEncryptedChar = text[i - 1]
-            val shift = alphabetMap[prevEncryptedChar.lowercaseChar()] ?: 0
-            result.append(shiftChar(text[i], shift, decrypt = true))
+        var lastEncryptedLetter: Char? = null
+
+        for (encryptedChar in text) {
+            if (!encryptedChar.isLetter()) {
+                result.append(encryptedChar)
+                continue
+            }
+
+            val decryptedChar = if (lastEncryptedLetter == null) {
+                encryptedChar
+            } else {
+                val shift = alphabetMap[lastEncryptedLetter.lowercaseChar()] ?: 0
+                shiftChar(encryptedChar, shift, decrypt = true)
+            }
+            result.append(decryptedChar)
+            lastEncryptedLetter = encryptedChar
         }
         return result.toString()
     }
