@@ -1,5 +1,6 @@
 package com.example.encryptia
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -270,18 +274,148 @@ fun EncryptBook(
             ) {
                 when (selectedKey) {
                     "Abecedárica" -> {
-                        Text(
-                            "Clave Abecedárica",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Abecedárica...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Título Funcionamiento
+                            Text(
+                                text = "Funcionamiento",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                            )
+
+                            // Descripción
+                            Text(
+                                text = "Cada letra se reemplaza por su opuesta simétrica en el alfabeto. Es una inversión completa del alfabeto, por lo tanto la letra que se quiera encriptar se busca primero en el abecedario de arriba y se ve cual es su equivalencia en el de abajo.",
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 16.sp,
+                                lineHeight = 20.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 24.dp)
+                            )
+
+                            // Abecedarios en un contenedor destacado
+                            Surface(
+                                color = Color.White.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "A B C D E F G H I J K L M N Ñ O P Q R S T U V W X Y Z",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = (-4.1).sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Divider(
+                                        color = Color.White.copy(alpha = 0.3f),
+                                        thickness = 1.dp,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.9f)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = "Z Y X W V U T S R Q P O Ñ N M L K J I H G F E D C B A",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = (-4.1).sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            // Título Ejemplo
+                            Text(
+                                text = "Ejemplo",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp)
+                            )
+
+                            // Ejemplo en un contenedor especial
+                            Surface(
+                                color = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "TEXTO ORIGINAL",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "LIBRO DE CLAVES",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Text(
+                                        text = "TEXTO CODIFICADO",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "ORYIL WV XOZEVH",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                        }
                     }
                     "Araucano" -> {
                         Text(
