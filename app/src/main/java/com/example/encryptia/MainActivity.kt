@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,13 +26,47 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+
+class DateVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val trimmed = if (text.text.length >= 6) text.text.substring(0..5) else text.text
+        var out = ""
+        for (i in trimmed.indices) {
+            out += trimmed[i]
+            if (i % 2 == 1 && i < 4) out += "/"
+        }
+
+        val dateOffsetTranslator = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset <= 1) return offset
+                if (offset <= 3) return offset + 1
+                if (offset <= 5) return offset + 2
+                return 8
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                if (offset <= 2) return offset
+                if (offset <= 5) return offset - 1
+                if (offset <= 8) return offset - 2
+                return 6
+            }
+        }
+
+        return TransformedText(AnnotatedString(out), dateOffsetTranslator)
+    }
+}
 
 class MainActivity : ComponentActivity() {
 
@@ -45,6 +80,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val keys = listOf(
                 "Palérinofu", "Murciélago", "Corrida",
+                "Corrida intrínseca simple", "Corrida intrínseca compuesta",
+                "Autocorrida por palabra", "Autocorrida por inicial", "Abecedárica", "Fechada",
                 "Paquidermo", "Araucano", "Superamigos", "Vocalica",
                 "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
             ).sorted()
@@ -278,6 +315,7 @@ fun EncryptorApp(
                                     selectedOption = when (key) {
                                         "Murciélago", "Paquidermo" -> "0"
                                         "Corrida" -> "E"
+                                        "Fechada" -> "240510"
                                         "Morse" -> "Normal"
                                         else -> "-"
                                     }
@@ -291,6 +329,7 @@ fun EncryptorApp(
                     "Murciélago", "Paquidermo" -> murcTypes
                     "Corrida" -> letters
                     "Morse" -> morseTypes
+                    "Fechada" -> listOf("240510", "ddmmyy")
                     else -> listOf("-")
                 }
 
@@ -299,38 +338,59 @@ fun EncryptorApp(
                     onExpandedChange = { if (optionList.size > 1) expandedOption = !expandedOption },
                     modifier = Modifier.weight(0.4f)
                 ) {
-                    TextField(
-                        value = selectedOption,
-                        onValueChange = {},
-                        readOnly = true,
-                        enabled = optionList.size > 1,
-                        placeholder = { Text("Tipo", color = secondaryText) },
-                        colors = TextFieldDefaults.colors(
-                            disabledTextColor = Color.Gray,
-                            disabledContainerColor = surfaceColor,
-                            focusedContainerColor = surfaceColor,
-                            unfocusedContainerColor = surfaceColor,
-                            focusedTextColor = primaryText,
-                            unfocusedTextColor = primaryText,
-                            cursorColor = accentColor
-                        ),
-                        modifier = Modifier.menuAnchor()
-                    )
+                     if (selectedKey == "Fechada") {
+                        TextField(
+                            value = selectedOption,
+                            onValueChange = { 
+                                if (it.length <= 6) {
+                                    selectedOption = it.filter { char -> char.isDigit() }
+                                }
+                             },
+                            label = { Text("ddmmyy") },
+                            visualTransformation = DateVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                             colors = TextFieldDefaults.colors(
+                                focusedContainerColor = surfaceColor,
+                                unfocusedContainerColor = surfaceColor,
+                                focusedTextColor = primaryText,
+                                unfocusedTextColor = primaryText,
+                                cursorColor = accentColor
+                            ),
+                        )
+                    } else {
+                        TextField(
+                            value = selectedOption,
+                            onValueChange = { selectedOption = it },
+                            readOnly = true,
+                            enabled = optionList.size > 1,
+                            placeholder = { Text("Tipo", color = secondaryText) },
+                            colors = TextFieldDefaults.colors(
+                                disabledTextColor = Color.Gray,
+                                disabledContainerColor = surfaceColor,
+                                focusedContainerColor = surfaceColor,
+                                unfocusedContainerColor = surfaceColor,
+                                focusedTextColor = primaryText,
+                                unfocusedTextColor = primaryText,
+                                cursorColor = accentColor
+                            ),
+                            modifier = Modifier.menuAnchor()
+                        )
 
-                    if (optionList.size > 1) {
-                        ExposedDropdownMenu(
-                            expanded = expandedOption,
-                            onDismissRequest = { expandedOption = false }
-                        ) {
-                            optionList.forEach { opt ->
-                                DropdownMenuItem(
-                                    text = { Text(opt) },
-                                    onClick = {
-                                        selectedOption = opt
-                                        expandedOption = false
-                                        onEncryptModeChange(true)
-                                    }
-                                )
+                        if (optionList.size > 1) {
+                            ExposedDropdownMenu(
+                                expanded = expandedOption,
+                                onDismissRequest = { expandedOption = false }
+                            ) {
+                                optionList.forEach { opt ->
+                                    DropdownMenuItem(
+                                        text = { Text(opt) },
+                                        onClick = {
+                                            selectedOption = opt
+                                            expandedOption = false
+                                            onEncryptModeChange(true)
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -421,6 +481,8 @@ fun EncryptorApp(
 fun DefaultPreview() {
     val keys = listOf(
         "Palérinofu", "Murciélago", "Corrida",
+        "Corrida intrínseca simple", "Corrida intrínseca compuesta",
+        "Autocorrida por palabra", "Autocorrida por inicial", "Abecedárica", "Fechada",
         "Paquidermo", "Araucano", "Superamigos", "Vocalica",
         "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
     ).sorted()
