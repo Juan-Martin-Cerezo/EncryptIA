@@ -23,8 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.mlkit.vision.common.InputImage
@@ -111,15 +113,22 @@ fun EncryptorApp(
     val morseTypes = listOf("Normal", "Extendido")
 
     val context = LocalContext.current
-    val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
+    val isInPreview = LocalInspectionMode.current
+    val recognizer = remember(isInPreview) {
+        if (isInPreview) {
+            null
+        } else {
+            TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        }
+    }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap: Bitmap? ->
         bitmap?.let {
             val image = InputImage.fromBitmap(it, 0)
-            recognizer.process(image)
-                .addOnSuccessListener { visionText ->
+            recognizer?.process(image)
+                ?.addOnSuccessListener { visionText ->
                     inputText = TextFieldValue(visionText.text)
                 }
         }
@@ -172,7 +181,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_compass),
                         contentDescription = "EncryptoCompass",
-                        modifier = Modifier.size(50.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
 
@@ -186,7 +195,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_camera),
                         contentDescription = "Escanear texto",
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
@@ -335,8 +344,7 @@ fun EncryptorApp(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow),
-                    contentDescription = "Intercambiar idioma",
-                    modifier = Modifier.size(44.dp)
+                    contentDescription = "Intercambiar idioma"
                 )
             }
 
@@ -379,4 +387,10 @@ fun EncryptorApp(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    EncryptorApp()
 }
