@@ -1,5 +1,9 @@
 package com.example.encryptia
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +37,19 @@ fun EncryptoCompass(
     var inputText by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<Pair<String, Float>>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
+    var visibleItems by remember { mutableStateOf(0) }
+
+    LaunchedEffect(results) {
+        if (results.isNotEmpty()) {
+            visibleItems = 0
+            for (i in 1..results.take(3).size) {
+                delay(150)
+                visibleItems = i
+            }
+        } else {
+            visibleItems = 0
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -78,6 +96,7 @@ fun EncryptoCompass(
             Button(
                 onClick = {
                     loading = true
+                    results = emptyList() // Reset for animation
                     results = classifier.predictWithProbabilities(inputText)
                     loading = false
                 },
@@ -92,31 +111,50 @@ fun EncryptoCompass(
             if (results.isEmpty() && !loading) {
                 Text("Esperando texto o predicción...", color = textColor)
             } else {
-                results.take(3).forEachIndexed { index, (method, prob) ->
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "${index + 1}. $method",
-                            color = Color(0xFF03DAC6),
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "%.2f%%".format(prob * 100),
-                            color = Color(0xFF03DAC6),
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.End
-                        )
+                Column {
+                    results.take(3).forEachIndexed { index, (method, prob) ->
+                        AnimatedVisibility(
+                            visible = index < visibleItems,
+                            enter = slideInHorizontally(initialOffsetX = { it / 2 }) + fadeIn(),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${index + 1}. $method",
+                                    color = Color(0xFF03DAC6),
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = "%.2f%%".format(prob * 100),
+                                    color = Color(0xFF03DAC6),
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.End
+                                )
+                            }
+                        }
                     }
                 }
 
-                if (results.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { onApplyKey(results.first().first, inputText) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = accentColor.copy(alpha = 0.8f))
-                    ) {
-                        Text("Usar ${results.first().first}")
+                AnimatedVisibility(
+                    visible = visibleItems >= results.take(3).size && results.isNotEmpty(),
+                    enter = fadeIn(animationSpec = tween(delayMillis = 100))
+                ) {
+                    if (results.isNotEmpty()) {
+                        Column {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { onApplyKey(results.first().first, inputText) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = accentColor.copy(alpha = 0.8f))
+                            ) {
+                                Text("Usar ${results.first().first}")
+                            }
+                        }
                     }
                 }
             }
