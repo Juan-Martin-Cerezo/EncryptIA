@@ -336,7 +336,7 @@ fun EncryptorApp(
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow),
                     contentDescription = "Intercambiar idioma",
-                    modifier = Modifier.size(46.dp)
+                    modifier = Modifier.size(44.dp)
                 )
             }
 
