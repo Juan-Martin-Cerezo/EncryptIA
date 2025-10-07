@@ -208,7 +208,7 @@ fun EncryptorApp(
                     Image(
                         painter = painterResource(id = R.drawable.ic_compass),
                         contentDescription = "EncryptoCompass",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(44.dp)
                     )
                 }
 
