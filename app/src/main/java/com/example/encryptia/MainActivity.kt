@@ -34,8 +34,16 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 class MainActivity : ComponentActivity() {
+
+    // Mantiene una sola instancia del modelo en memoria
+    private lateinit var classifier: EncryptionClassifier
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Cargar el modelo TensorFlow Lite
+        classifier = EncryptionClassifier(this)
+
         setContent {
             var showBook by remember { mutableStateOf(false) }
             var showCompass by remember { mutableStateOf(false) }
@@ -67,7 +75,11 @@ class MainActivity : ComponentActivity() {
                 }
 
                 showCompass -> {
-                    EncryptoCompass(onBack = { showCompass = false })
+                    // 🔗 Pasamos el modelo al Compass
+                    EncryptoCompass(
+                        onBack = { showCompass = false },
+                        classifier = classifier
+                    )
                 }
 
                 else -> {
@@ -83,6 +95,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        classifier.close() // Libera la memoria del modelo
     }
 }
 
@@ -115,11 +132,8 @@ fun EncryptorApp(
     val context = LocalContext.current
     val isInPreview = LocalInspectionMode.current
     val recognizer = remember(isInPreview) {
-        if (isInPreview) {
-            null
-        } else {
-            TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        }
+        if (isInPreview) null
+        else TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -171,7 +185,7 @@ fun EncryptorApp(
                     )
                 }
 
-                // 🧭 Nuevo botón Compass
+                // 🧭 Botón Compass (IA)
                 IconButton(
                     onClick = onOpenCompass,
                     modifier = Modifier
