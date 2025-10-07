@@ -54,6 +54,7 @@ class MainActivity : ComponentActivity() {
             var selectedInfoKey by remember { mutableStateOf<String?>(null) }
             var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
             var inputText by remember { mutableStateOf(TextFieldValue("")) }
+            var encryptMode by remember { mutableStateOf(true) }
 
             when {
                 showBook -> {
@@ -87,6 +88,7 @@ class MainActivity : ComponentActivity() {
                             val matchingKey = keys.find { it.equals(keyFromModel, ignoreCase = true) }
                             selectedKey = matchingKey ?: keyFromModel
                             inputText = TextFieldValue(text)
+                            encryptMode = false // El texto es encriptado, así que vamos a desencriptar
                             showCompass = false
                         }
                     )
@@ -103,7 +105,9 @@ class MainActivity : ComponentActivity() {
                         onOpenCompass = { showCompass = true },
                         inputText = inputText,
                         onInputTextChange = { newText -> inputText = newText },
-                        keys = keys
+                        keys = keys,
+                        encryptMode = encryptMode,
+                        onEncryptModeChange = { encryptMode = it }
                     )
                 }
             }
@@ -119,20 +123,20 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncryptorApp(
-    selectedKey: String = "Seleccioná una clave",
-    onChangeKey: (String) -> Unit = {},
-    onOpenBook: () -> Unit = {},
-    onOpenCompass: () -> Unit = {},
+    selectedKey: String,
+    onChangeKey: (String) -> Unit,
+    onOpenBook: () -> Unit,
+    onOpenCompass: () -> Unit,
     inputText: TextFieldValue,
     onInputTextChange: (TextFieldValue) -> Unit,
-    keys: List<String>
+    keys: List<String>,
+    encryptMode: Boolean,
+    onEncryptModeChange: (Boolean) -> Unit
 ) {
     var expandedKey by remember { mutableStateOf(false) }
 
     var selectedOption by remember { mutableStateOf("-") }
     var expandedOption by remember { mutableStateOf(false) }
-
-    var encryptMode by remember { mutableStateOf(true) }
 
     val murcTypes = listOf("0", "1")
     val letters = ('A'..'N').map { it.toString() } + "Ñ" + ('O'..'Z').map { it.toString() }
@@ -270,7 +274,7 @@ fun EncryptorApp(
                                 onClick = {
                                     onChangeKey(key)
                                     expandedKey = false
-                                    encryptMode = true
+                                    onEncryptModeChange(true)
                                     selectedOption = when (key) {
                                         "Murciélago", "Paquidermo" -> "0"
                                         "Corrida" -> "E"
@@ -324,7 +328,7 @@ fun EncryptorApp(
                                     onClick = {
                                         selectedOption = opt
                                         expandedOption = false
-                                        encryptMode = true
+                                        onEncryptModeChange(true)
                                     }
                                 )
                             }
@@ -358,7 +362,7 @@ fun EncryptorApp(
             IconButton(
                 onClick = {
                     onInputTextChange(TextFieldValue(outputText))
-                    encryptMode = !encryptMode
+                    onEncryptModeChange(!encryptMode)
                 },
                 modifier = Modifier
                     .size(64.dp)
@@ -421,9 +425,16 @@ fun DefaultPreview() {
         "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
     ).sorted()
     var inputText by remember { mutableStateOf(TextFieldValue("")) }
+    var encryptMode by remember { mutableStateOf(true) }
     EncryptorApp(
         inputText = inputText,
         onInputTextChange = { inputText = it },
-        keys = keys
+        keys = keys,
+        selectedKey = "Seleccioná una clave",
+        onChangeKey = {},
+        onOpenBook = {},
+        onOpenCompass = {},
+        encryptMode = encryptMode,
+        onEncryptModeChange = { encryptMode = it }
     )
 }
