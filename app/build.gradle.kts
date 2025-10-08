@@ -41,8 +41,8 @@ android {
 }
 
 dependencies {
-    implementation("org.tensorflow:tensorflow-lite:2.12.0")
-    implementation("org.tensorflow:tensorflow-lite-select-tf-ops:2.12.0")
+    implementation("org.tensorflow:tensorflow-lite:2.16.1")
+    implementation("org.tensorflow:tensorflow-lite-select-tf-ops:2.16.1")
 
     implementation("com.google.code.gson:gson:2.10.1")
 

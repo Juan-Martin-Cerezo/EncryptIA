@@ -8,97 +8,120 @@ import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-// Configuración del tokenizador
-data class TokenizerConfig(
-    val word_index: Map<String, Int>
-)
-
-// Configuración del codificador de etiquetas
-data class LabelEncoderConfig(
-    val classes: List<String>
-)
+data class TokenizerConfig(val word_index: Map<String, Int>)
+data class LabelEncoderConfig(val classes: List<String>)
 
 class EncryptionClassifier(private val context: Context) {
+
+    companion object {
+        private const val TAG = "EncryptionClassifier"
+        private const val MODEL_FILE = "best_model.tflite"
+        private const val TOKENIZER_FILE = "tokenizer.json"
+        private const val LABEL_FILE = "label_encoder.json"
+        private const val MAX_LEN = 80
+    }
 
     private var interpreter: Interpreter? = null
     private var tokenizer: TokenizerConfig? = null
     private var labelEncoder: LabelEncoderConfig? = null
-    private val maxLen = 80
 
     init {
         try {
-            val modelBuffer = loadModelFile("best_model.tflite")
-            interpreter = Interpreter(modelBuffer)
-            tokenizer = loadJson("tokenizer.json", TokenizerConfig::class.java)
-            labelEncoder = loadJson("label_encoder.json", LabelEncoderConfig::class.java)
+            Log.d(TAG, "🚀 Inicializando clasificador...")
 
-            Log.d("EncryptionClassifier", "✅ Modelo cargado correctamente")
-            Log.d("EncryptionClassifier", "Tokenizer con ${tokenizer?.word_index?.size} tokens")
-            Log.d("EncryptionClassifier", "Clases detectadas: ${labelEncoder?.classes}")
+            // Cargar JSONs primero
+            tokenizer = loadJson(TOKENIZER_FILE, TokenizerConfig::class.java)
+            labelEncoder = loadJson(LABEL_FILE, LabelEncoderConfig::class.java)
+
+            Log.d(TAG, "📚 Tokenizer: ${tokenizer?.word_index?.size} tokens")
+            Log.d(TAG, "🏷️  Clases: ${labelEncoder?.classes?.size} métodos")
+
+            // Cargar modelo con opciones
+            val modelBuffer = loadModelFile(MODEL_FILE)
+            val options = Interpreter.Options().apply {
+                setNumThreads(4)
+            }
+            interpreter = Interpreter(modelBuffer, options)
+
+            Log.d(TAG, "✅ Modelo cargado exitosamente")
+
         } catch (e: Exception) {
-            Log.e("EncryptionClassifier", "❌ Error cargando modelo o archivos JSON", e)
+            Log.e(TAG, "❌ Error en inicialización", e)
         }
     }
 
-    /** Carga el modelo .tflite desde assets */
     private fun loadModelFile(filename: String): MappedByteBuffer {
-        val fileDescriptor = context.assets.openFd(filename)
-        FileInputStream(fileDescriptor.fileDescriptor).use { input ->
-            val channel = input.channel
-            return channel.map(FileChannel.MapMode.READ_ONLY, fileDescriptor.startOffset, fileDescriptor.declaredLength)
+        context.assets.openFd(filename).use { fd ->
+            FileInputStream(fd.fileDescriptor).use { input ->
+                return input.channel.map(
+                    FileChannel.MapMode.READ_ONLY,
+                    fd.startOffset,
+                    fd.declaredLength
+                )
+            }
         }
     }
 
-    /** Carga un archivo JSON y lo convierte al objeto especificado */
     private fun <T> loadJson(filename: String, clazz: Class<T>): T {
         val json = context.assets.open(filename).bufferedReader().use { it.readText() }
         return Gson().fromJson(json, clazz)
     }
 
-    /** Convierte texto a una secuencia numérica para el modelo */
-    private fun textToSequence(text: String): IntArray {
-        val wordIndex = tokenizer?.word_index ?: return IntArray(maxLen)
-        val sequence = mutableListOf<Int>()
-        val lowerText = text.lowercase()
+    private fun preprocess(text: String): Array<IntArray> {
+        val wordIndex = tokenizer?.word_index ?: emptyMap()
+        val sequence = IntArray(MAX_LEN) { 0 }
 
-        lowerText.forEach { char ->
-            val index = wordIndex[char.toString()] ?: 0
-            sequence.add(index)
+        val cleanText = text.lowercase().trim()
+
+        // Tokenizar carácter por carácter
+        for (i in cleanText.indices) {
+            if (i >= MAX_LEN) break
+            sequence[i] = wordIndex[cleanText[i].toString()] ?: 1 // <UNK> = 1
         }
 
-        val padded = IntArray(maxLen)
-        for (i in 0 until minOf(sequence.size, maxLen)) {
-            padded[i] = sequence[i]
-        }
-
-        return padded
+        // ✅ DEVOLVER INT32, NO FLOAT32
+        return Array(1) { sequence }
     }
 
-    /** Ejecuta la predicción en el modelo y devuelve las 5 más probables */
     fun predictWithProbabilities(text: String): List<Pair<String, Float>> {
         return try {
-            val inputArray = Array(1) { FloatArray(maxLen) }
-            val sequence = textToSequence(text)
-            for (i in sequence.indices) inputArray[0][i] = sequence[i].toFloat()
+            if (interpreter == null) {
+                Log.e(TAG, "⚠️ Intérprete no inicializado")
+                return emptyList()
+            }
 
-            val numClasses = labelEncoder?.classes?.size ?: 0
-            val outputArray = Array(1) { FloatArray(numClasses) }
+            val classes = labelEncoder?.classes ?: return emptyList()
 
-            interpreter?.run(inputArray, outputArray)
+            // ✅ Input como INT32
+            val input = preprocess(text)
+            val output = Array(1) { FloatArray(classes.size) }
 
-            val predictions = outputArray[0]
-            val classes = labelEncoder?.classes ?: emptyList()
+            interpreter?.run(input, output)
 
-            classes.indices.map { i -> classes[i] to predictions[i] }
+            val predictions = output[0]
+            val results = classes.indices
+                .map { i -> classes[i] to predictions[i] }
                 .sortedByDescending { it.second }
                 .take(5)
+
+            Log.d(TAG, "🔮 Predicciones:")
+            results.take(3).forEach { (method, prob) ->
+                Log.d(TAG, "  $method: ${(prob * 100).format(1)}%")
+            }
+
+            results
         } catch (e: Exception) {
-            Log.e("EncryptionClassifier", "❌ Error al predecir", e)
+            Log.e(TAG, "❌ Error en predicción", e)
             emptyList()
         }
     }
 
     fun close() {
         interpreter?.close()
+        interpreter = null
+        Log.d(TAG, "🧹 Recursos liberados")
     }
 }
+
+// Extension para formatear Float
+private fun Float.format(decimals: Int): String = "%.${decimals}f".format(this)
