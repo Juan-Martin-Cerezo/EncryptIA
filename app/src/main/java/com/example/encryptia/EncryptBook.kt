@@ -1,5 +1,6 @@
 package com.example.encryptia
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -84,6 +85,17 @@ fun EncryptBook(
 
     val isDetail = selectedKey != null
 
+    // 🔥 AGREGAR ESTE BACKHANDER - NUEVO CÓDIGO
+    BackHandler(enabled = true) {
+        if (selectedKey != null) {
+            // Si estamos en detalle de clave, volver a la lista
+            onSelectKey(null, false)
+        } else {
+            // Si estamos en la lista, volver a pantalla principal
+            onBack()
+        }
+    }
+
     // Filtrado
     val filteredKeys = allKeys.filter { key ->
         val matchesSearch = key.contains(searchQuery, ignoreCase = true)
@@ -114,7 +126,9 @@ fun EncryptBook(
                     TopAppBar(
                         title = { Text("Libro de claves", color = Color.White) },
                         navigationIcon = {
-                            IconButton(onClick = onBack) {
+                            IconButton(
+                                onClick = { onSelectKey(null, false) }
+                            ) {
                                 Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
                             }
                         },

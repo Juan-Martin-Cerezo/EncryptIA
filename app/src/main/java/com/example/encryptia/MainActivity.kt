@@ -97,13 +97,21 @@ class MainActivity : ComponentActivity() {
             when {
                 showBook -> {
                     BackHandler {
-                        showBook = false
-                        selectedInfoKey = null
+                        // Si hay una clave seleccionada, vuelve a la lista
+                        // Si no hay clave seleccionada, vuelve a la pantalla principal
+                        if (selectedInfoKey != null) {
+                            selectedInfoKey = null
+                        } else {
+                            showBook = false
+                        }
                     }
                     EncryptBook(
                         onBack = {
-                            showBook = false
-                            selectedInfoKey = null
+                            if (selectedInfoKey != null) {
+                                selectedInfoKey = null
+                            } else {
+                                showBook = false
+                            }
                         },
                         onSelectKey = { key: String?, usarClave: Boolean ->
                             if (usarClave && key != null) {
@@ -153,6 +161,12 @@ class MainActivity : ComponentActivity() {
                 }
 
                 else -> {
+                    // Agrega este BackHandler para la pantalla principal
+                    BackHandler(enabled = true) {
+                        // Si estamos en la pantalla principal, el botón atrás cierra la app
+                        finish()
+                    }
+
                     EncryptorApp(
                         selectedKey = selectedKey,
                         onChangeKey = { newKey -> selectedKey = newKey },
