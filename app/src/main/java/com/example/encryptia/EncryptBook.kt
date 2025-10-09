@@ -22,10 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +89,7 @@ fun EncryptBook(
 
     val isDetail = selectedKey != null
 
-    // 🔥 AGREGAR ESTE BACKHANDER - NUEVO CÓDIGO
+    // 🔥 BACKHANDER CORREGIDO
     BackHandler(enabled = true) {
         if (selectedKey != null) {
             // Si estamos en detalle de clave, volver a la lista
@@ -126,8 +130,9 @@ fun EncryptBook(
                     TopAppBar(
                         title = { Text("Libro de claves", color = Color.White) },
                         navigationIcon = {
+                            // 🔥 CORREGIDO: Usar onBack en lugar de onSelectKey
                             IconButton(
-                                onClick = { onSelectKey(null, false) }
+                                onClick = { onBack() }
                             ) {
                                 Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
                             }
@@ -429,21 +434,216 @@ fun EncryptBook(
                                     )
                                 }
                             }
+                            // Nota adicional
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Surface(
+                                color = Color(0xFFBB86FC).copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFFBB86FC).copy(alpha = 0.3f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "💡 Nota: todavia no hay nota, troll",
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(12.dp)
+                                )
+                            }
                         }
                     }
                     "Araucano" -> {
-                        Text(
-                            "Clave Araucano",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Araucano...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Título Funcionamiento
+                            Text(
+                                text = "Funcionamiento",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                            )
+
+                            // Descripción
+                            Text(
+                                text = "Se basa en intercambiar letras según el siguiente mapeo fijo. Las letras se intercambian con sus pares correspondientes. Las letras que no están en este conjunto no se modifican. La codificación y decodificación son idénticas (simétricas).",
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 16.sp,
+                                lineHeight = 20.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 24.dp)
+                            )
+
+                            // Mapeo en un contenedor destacado CON COLOR DIFERENCIADO CORREGIDO
+                            Surface(
+                                color = Color.White.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            append("A R ")
+                                            withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.4f))) {
+                                                append("A")
+                                            }
+                                            append(" U C ")
+                                            withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.4f))) {
+                                                append("A")
+                                            }
+                                            append(" N O")
+                                        },
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 2.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Divider(
+                                        color = Color.White.copy(alpha = 0.3f),
+                                        thickness = 1.dp,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.9f)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            append("O N ")
+                                            withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.4f))) {
+                                                append("A")
+                                            }
+                                            append(" C U ")
+                                            withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.4f))) {
+                                                append("A")
+                                            }
+                                            append(" R A")
+                                        },
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 2.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            // Título Ejemplo
+                            Text(
+                                text = "Ejemplo",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp)
+                            )
+
+                            // Ejemplo en un contenedor especial
+                            Surface(
+                                color = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "TEXTO ORIGINAL",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "LIBRO DE CLAVES",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Text(
+                                        text = "TEXTO CODIFICADO",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "LIBNA DE ULOVES",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            // Nota adicional
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Surface(
+                                color = Color(0xFFBB86FC).copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFFBB86FC).copy(alpha = 0.3f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "💡 Nota: Las letras 'A' que se encuentran en el medio de la palabra Araucano se suelen tachar y no se usan.",
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(12.dp)
+                                )
+                            }
+                        }
                     }
                     "Autocorrida por inicial" -> {
                         Text(
@@ -628,18 +828,169 @@ fun EncryptBook(
                         )
                     }
                     "Superamigos" -> {
-                        Text(
-                            "Clave Superamigos",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Superamigos...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Título Funcionamiento
+                            Text(
+                                text = "Funcionamiento",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                            )
+
+                            // Descripción
+                            Text(
+                                text = "Se basa en la palabra SUPERAMIGOS, donde las letras se intercambian en pares simétricos. Se escribe una vez la palabra normal y debajo su versión invertida. Las demás letras del texto original fuera de este conjunto quedan igual. La codificación y decodificación son el mismo proceso.",
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 16.sp,
+                                lineHeight = 20.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 24.dp)
+                            )
+
+                            // Mapeo en un contenedor destacado
+                            Surface(
+                                color = Color.White.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "S U P E R A M I G O S",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 1.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Divider(
+                                        color = Color.White.copy(alpha = 0.3f),
+                                        thickness = 1.dp,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.9f)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = "S O G I M A R E P U S",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 1.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            // Título Ejemplo
+                            Text(
+                                text = "Ejemplo",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp)
+                            )
+
+                            // Ejemplo en un contenedor especial
+                            Surface(
+                                color = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "TEXTO ORIGINAL",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "LIBRO DE CLAVES",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Text(
+                                        text = "TEXTO CODIFICADO",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "LEBMU DI CLAVIS",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            // Nota adicional
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Surface(
+                                color = Color(0xFFBB86FC).copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFFBB86FC).copy(alpha = 0.3f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "💡 Nota: Las letras S y A al su par se la misma letra no se cambian, así que no hace falta fijarse mucho en ellas.",
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(12.dp)
+                                )
+                            }
+                        }
                     }
                     "Vocalica" -> {
                         Text(
