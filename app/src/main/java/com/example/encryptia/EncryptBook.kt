@@ -786,18 +786,315 @@ fun EncryptBook(
                         )
                     }
                     "Murciélago" -> {
-                        Text(
-                            "Clave Murciélago",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Murciélago...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Título Funcionamiento
+                            Text(
+                                text = "Funcionamiento",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                            )
+
+                            // Descripción
+                            Text(
+                                text = "Se reemplazan las letras de la palabra MURCIELAGO por números según su posición. Se escribe la palabra normal y debajo se empareja cada letra con un numero del 0-9. Esta clave tiene dos variantes pero el comportamiento es el mismo. Las letras que no están en MURCIELAGO no se cambian.",
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 16.sp,
+                                lineHeight = 20.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 24.dp)
+                            )
+
+                            // PRIMER DICCIONARIO - Murciélago 0
+                            Surface(
+                                color = Color.White.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Murciélago 0",
+                                        color = accentColor,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Text(
+                                        text = "M U R C I E L A G O",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 1.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Divider(
+                                        color = Color.White.copy(alpha = 0.3f),
+                                        thickness = 1.dp,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.9f)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = "0 1 2 3 4 5 6 7 8 9",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 1.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // SEGUNDO DICCIONARIO - Murciélago 1
+                            Surface(
+                                color = Color.White.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Murciélago 1",
+                                        color = accentColor,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    Text(
+                                        text = "M U R C I E L A G O",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 1.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Divider(
+                                        color = Color.White.copy(alpha = 0.3f),
+                                        thickness = 1.dp,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.9f)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = "1 2 3 4 5 6 7 8 9 0",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        letterSpacing = 1.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            // Título Ejemplo
+                            Text(
+                                text = "Ejemplo",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp)
+                            )
+
+                            // PRIMER EJEMPLO - Murciélago 0
+                            Surface(
+                                color = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "MURCIÉLAGO 0",
+                                        color = accentColor,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "TEXTO ORIGINAL",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "LIBRO DE CLAVES",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "TEXTO CODIFICADO",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "64B29 D5 367V5S",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // SEGUNDO EJEMPLO - Murciélago 1
+                            Surface(
+                                color = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "MURCIÉLAGO 1",
+                                        color = accentColor,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "TEXTO ORIGINAL",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "LIBRO DE CLAVES",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "TEXTO CODIFICADO",
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        text = "75B30 D6 478V6S",
+                                        color = Color.White,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+
+                            // Nota adicional
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Surface(
+                                color = Color(0xFFBB86FC).copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFFBB86FC).copy(alpha = 0.3f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "💡 Nota: La diferencia entre las variantes es el número con el que empiezan, si el 0 o el 1.",
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(12.dp)
+                                )
+                            }
+                        }
                     }
                     "Palérinofu" -> {
                         Text(
