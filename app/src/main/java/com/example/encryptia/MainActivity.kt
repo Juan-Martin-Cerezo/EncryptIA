@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -175,14 +176,14 @@ class MainActivity : ComponentActivity() {
 
                     EncryptorApp(
                         selectedKey = selectedKey,
-                        onChangeKey = { newKey -> selectedKey = newKey },
+                        onChangeKey = { selectedKey = it },
                         onOpenBook = {
                             selectedInfoKey = null
                             showBook = true
                         },
                         onOpenCompass = { showCompass = true },
                         inputText = inputText,
-                        onInputTextChange = { newText -> inputText = newText },
+                        onInputTextChange = { inputText = it },
                         keys = keys,
                         encryptMode = encryptMode,
                         onEncryptModeChange = { encryptMode = it }
@@ -241,6 +242,23 @@ fun EncryptorApp(
         }
     }
 
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            try {
+                val image = InputImage.fromFilePath(context, uri)
+                recognizer?.process(image)
+                    ?.addOnSuccessListener { visionText ->
+                        onInputTextChange(TextFieldValue(visionText.text))
+                    }
+                    ?.addOnFailureListener { e -> e.printStackTrace() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     val bgColor = Color(0xFF121212)
     val surfaceColor = Color(0xFF1E1E1E)
     val accentColor = Color(0xFFBB86FC)
@@ -255,52 +273,47 @@ fun EncryptorApp(
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("EncryptIA", color = primaryText) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = surfaceColor)
+            )
+        },
         bottomBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(surfaceColor)
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onOpenBook,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(accentColor, CircleShape)
+                    modifier = Modifier.size(64.dp).background(accentColor, CircleShape)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_book),
-                        contentDescription = "Listado de claves",
-                        modifier = Modifier.size(48.dp)
-                    )
+                    Image(painter = painterResource(id = R.drawable.ic_book), contentDescription = "Listado de claves", modifier = Modifier.size(48.dp))
                 }
 
                 IconButton(
                     onClick = onOpenCompass,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(accentColor, CircleShape)
+                    modifier = Modifier.size(64.dp).background(accentColor, CircleShape)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_compass),
-                        contentDescription = "EncryptoCompass",
-                        modifier = Modifier.size(58.dp)
-                    )
+                    Image(painter = painterResource(id = R.drawable.ic_compass), contentDescription = "EncryptoCompass", modifier = Modifier.size(58.dp))
                 }
 
                 IconButton(
                     onClick = { cameraLauncher.launch(null) },
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(accentColor, CircleShape)
+                    modifier = Modifier.size(64.dp).background(accentColor, CircleShape)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_camera),
-                        contentDescription = "Escanear texto",
-                        modifier = Modifier.size(34.dp)
-                    )
+                    Image(painter = painterResource(id = R.drawable.ic_camera), contentDescription = "Escanear texto (cámara)", modifier = Modifier.size(34.dp))
+                }
+
+                IconButton(
+                    onClick = { galleryLauncher.launch("image/*") },
+                    modifier = Modifier.size(64.dp).background(accentColor, CircleShape)
+                ) {
+                    Image(painter = painterResource(id = R.drawable.ic_gallery), contentDescription = "Seleccionar desde galería", modifier = Modifier.size(34.dp))
                 }
             }
         }
