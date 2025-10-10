@@ -14,10 +14,20 @@ object Encryptor {
             "Murciélago" -> murcielagoEncrypt(text, option.toIntOrNull() ?: 0)
             "Paquidermo" -> paquidermoEncrypt(text, option.toIntOrNull() ?: 0)
             "Corrida" -> corridaEncrypt(text, option)
-            "Corrida intrínseca simple" -> corridaIntrinsecaSimpleEncrypt(text)
-            "Corrida intrínseca compuesta" -> corridaIntrinsecaCompuestaEncrypt(text)
-            "Autocorrida por palabra" -> autocorridaPorPalabraEncrypt(text)
-            "Autocorrida por inicial" -> autocorridaPorInicialEncrypt(text)
+            "Corrida intrínseca" -> {
+                when (option.lowercase()) {
+                    "simple" -> corridaIntrinsecaSimpleEncrypt(text)
+                    "compuesta" -> corridaIntrinsecaCompuestaEncrypt(text)
+                    else -> corridaIntrinsecaSimpleEncrypt(text)
+                }
+            }
+            "Autocorrida" -> {
+                when (option.lowercase()) {
+                    "por palabra" -> autocorridaPorPalabraEncrypt(text)
+                    "por inicial" -> autocorridaPorInicialEncrypt(text)
+                    else -> autocorridaPorPalabraEncrypt(text)
+                }
+            }
             "Abecedárica" -> abecedaricaEncrypt(text)
             "Fechada" -> fechadaEncrypt(text, option)
             "Araucano" -> araucanoEncrypt(text)
@@ -37,10 +47,20 @@ object Encryptor {
             "Murciélago" -> murcielagoDecrypt(text, option.toIntOrNull() ?: 0)
             "Paquidermo" -> paquidermoDecrypt(text, option.toIntOrNull() ?: 0)
             "Corrida" -> corridaDecrypt(text, option)
-            "Corrida intrínseca simple" -> corridaIntrinsecaSimpleDecrypt(text)
-            "Corrida intrínseca compuesta" -> corridaIntrinsecaCompuestaDecrypt(text)
-            "Autocorrida por palabra" -> autocorridaPorPalabraDecrypt(text)
-            "Autocorrida por inicial" -> autocorridaPorInicialDecrypt(text)
+            "Corrida intrínseca" -> {
+                when (option.lowercase()) {
+                    "simple" -> corridaIntrinsecaSimpleDecrypt(text)
+                    "compuesta" -> corridaIntrinsecaCompuestaDecrypt(text)
+                    else -> corridaIntrinsecaSimpleDecrypt(text)
+                }
+            }
+            "Autocorrida" -> {
+                when (option.lowercase()) {
+                    "por palabra" -> autocorridaPorPalabraDecrypt(text)
+                    "por inicial" -> autocorridaPorInicialDecrypt(text)
+                    else -> autocorridaPorPalabraDecrypt(text)
+                }
+            }
             "Abecedárica" -> abecedaricaDecrypt(text)
             "Fechada" -> fechadaDecrypt(text, option)
             "Araucano" -> araucanoDecrypt(text)

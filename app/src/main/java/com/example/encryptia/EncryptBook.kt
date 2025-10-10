@@ -42,11 +42,9 @@ fun EncryptBook(
     val allKeys = listOf(
         "Abecedárica",
         "Araucano",
-        "Autocorrida por inicial",
-        "Autocorrida por palabra",
+        "Autocorrida",
         "Corrida",
-        "Corrida intrínseca compuesta",
-        "Corrida intrínseca simple",
+        "Corrida intrínseca",
         "Dame tu pico",
         "Fechada",
         "Idioma X",
@@ -62,11 +60,9 @@ fun EncryptBook(
     val keyTags = mapOf(
         "Abecedárica" to listOf("Alfabética"),
         "Araucano" to listOf("Parcial"),
-        "Autocorrida por inicial" to listOf("Alfabética"),
-        "Autocorrida por palabra" to listOf("Alfabética"),
+        "Autocorrida" to listOf("Alfabética"),
         "Corrida" to listOf("Alfabética"),
-        "Corrida intrínseca compuesta" to listOf("Alfabética"),
-        "Corrida intrínseca simple" to listOf("Alfabética"),
+        "Corrida intrínseca" to listOf("Alfabética"),
         "Dame tu pico" to listOf("Parcial"),
         "Fechada" to listOf("Alfabética"),
         "Idioma X" to listOf("Parcial"),
@@ -226,7 +222,7 @@ fun EncryptBook(
                             .padding(8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = accentColor,
-                            contentColor = Color.Black
+                            contentColor = Color.Black,
                         )
                     ) {
                         Text(key, color = Color.Black)
@@ -645,7 +641,7 @@ fun EncryptBook(
                             }
                         }
                     }
-                    "Autocorrida por inicial" -> {
+                    "Autocorrida" -> {
                         Text(
                             "Clave Autocorrida por inicial",
                             color = Color.White,
@@ -654,20 +650,6 @@ fun EncryptBook(
                         )
                         Text(
                             "Aquí va la explicación detallada de la clave Autocorrida por inicial...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-                    "Autocorrida por palabra" -> {
-                        Text(
-                            "Clave Autocorrida por palabra",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Autocorrida por palabra...",
                             color = Color.White,
                             fontSize = 18.sp,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -687,7 +669,7 @@ fun EncryptBook(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
-                    "Corrida intrínseca compuesta" -> {
+                    "Corrida intrínseca" -> {
                         Text(
                             "Clave Corrida intrínseca compuesta",
                             color = Color.White,
@@ -696,20 +678,6 @@ fun EncryptBook(
                         )
                         Text(
                             "Aquí va la explicación detallada de la clave Corrida intrínseca compuesta...",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-                    "Corrida intrínseca simple" -> {
-                        Text(
-                            "Clave Corrida intrínseca simple",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            "Aquí va la explicación detallada de la clave Corrida intrínseca simple...",
                             color = Color.White,
                             fontSize = 18.sp,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)

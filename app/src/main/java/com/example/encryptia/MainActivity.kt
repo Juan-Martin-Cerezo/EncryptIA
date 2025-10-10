@@ -81,8 +81,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val keys = listOf(
                 "Palérinofu", "Murciélago", "Corrida",
-                "Corrida intrínseca simple", "Corrida intrínseca compuesta",
-                "Autocorrida por palabra", "Autocorrida por inicial", "Abecedárica", "Fechada",
+                "Corrida intrínseca", "Autocorrida", "Abecedárica", "Fechada",
                 "Paquidermo", "Araucano", "Superamigos", "Vocalica",
                 "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
             ).sorted()
@@ -91,14 +90,13 @@ class MainActivity : ComponentActivity() {
             var showCompass by remember { mutableStateOf(false) }
             var selectedInfoKey by remember { mutableStateOf<String?>(null) }
             var selectedKey by remember { mutableStateOf("Seleccioná una clave") }
+            var selectedOption by remember { mutableStateOf("-") }
             var inputText by remember { mutableStateOf(TextFieldValue("")) }
             var encryptMode by remember { mutableStateOf(true) }
 
             when {
                 showBook -> {
                     BackHandler {
-                        // Si hay una clave seleccionada, vuelve a la lista
-                        // Si no hay clave seleccionada, vuelve a la pantalla principal
                         if (selectedInfoKey != null) {
                             selectedInfoKey = null
                         } else {
@@ -116,6 +114,16 @@ class MainActivity : ComponentActivity() {
                         onSelectKey = { key: String?, usarClave: Boolean ->
                             if (usarClave && key != null) {
                                 selectedKey = key
+                                // Establecer opción por defecto según la clave
+                                selectedOption = when (key) {
+                                    "Murciélago", "Paquidermo" -> "0"
+                                    "Corrida" -> "E"
+                                    "Fechada" -> "240510"
+                                    "Morse" -> "Normal"
+                                    "Corrida intrínseca" -> "Simple"
+                                    "Autocorrida" -> "Por palabra"
+                                    else -> "-"
+                                }
                                 showBook = false
                                 selectedInfoKey = null
                             } else {
@@ -141,6 +149,8 @@ class MainActivity : ComponentActivity() {
                             val uiKey = when (keyFromModel.lowercase()) {
                                 "araucano" -> "Araucano"
                                 "corrida" -> "Corrida"
+                                "corridaintrinseca" -> "Corrida intrínseca"
+                                "autocorrida" -> "Autocorrida"
                                 "dame" -> "Dame tu pico"
                                 "idiomax" -> "Idioma X"
                                 "karlina" -> "Karlina Betfuse"
@@ -150,22 +160,18 @@ class MainActivity : ComponentActivity() {
                                 "paquidermo" -> "Paquidermo"
                                 "superamigos" -> "Superamigos"
                                 "vocalica" -> "Vocalica"
-                                else -> keyFromModel // Fallback to the original model key
+                                else -> keyFromModel
                             }
                             selectedKey = uiKey
                             inputText = TextFieldValue(text)
-                            encryptMode = false // El texto es encriptado, así que vamos a desencriptar
+                            encryptMode = false
                             showCompass = false
                         }
                     )
                 }
 
                 else -> {
-                    // Agrega este BackHandler para la pantalla principal
-                    BackHandler(enabled = true) {
-                        // Si estamos en la pantalla principal, el botón atrás cierra la app
-                        finish()
-                    }
+                    BackHandler(enabled = true) { finish() }
 
                     EncryptorApp(
                         selectedKey = selectedKey,
@@ -213,6 +219,8 @@ fun EncryptorApp(
     val murcTypes = listOf("0", "1")
     val letters = ('A'..'N').map { it.toString() } + "Ñ" + ('O'..'Z').map { it.toString() }
     val morseTypes = listOf("Normal", "Extendido")
+    val corridaIntrinsecaTypes = listOf("Simple", "Compuesta")
+    val autocorridaTypes = listOf("Por palabra", "Por inicial")
 
     val context = LocalContext.current
     val isInPreview = LocalInspectionMode.current
@@ -256,7 +264,6 @@ fun EncryptorApp(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 📘 Botón Libro
                 IconButton(
                     onClick = onOpenBook,
                     modifier = Modifier
@@ -270,7 +277,6 @@ fun EncryptorApp(
                     )
                 }
 
-                // 🧭 Nuevo botón Compass
                 IconButton(
                     onClick = onOpenCompass,
                     modifier = Modifier
@@ -284,7 +290,6 @@ fun EncryptorApp(
                     )
                 }
 
-                // 📷 Botón Cámara
                 IconButton(
                     onClick = { cameraLauncher.launch(null) },
                     modifier = Modifier
@@ -353,6 +358,8 @@ fun EncryptorApp(
                                         "Corrida" -> "E"
                                         "Fechada" -> "240510"
                                         "Morse" -> "Normal"
+                                        "Corrida intrínseca" -> "Simple"
+                                        "Autocorrida" -> "Por palabra"
                                         else -> "-"
                                     }
                                 }
@@ -365,6 +372,8 @@ fun EncryptorApp(
                     "Murciélago", "Paquidermo" -> murcTypes
                     "Corrida" -> letters
                     "Morse" -> morseTypes
+                    "Corrida intrínseca" -> corridaIntrinsecaTypes
+                    "Autocorrida" -> autocorridaTypes
                     "Fechada" -> listOf("240510", "ddmmyy")
                     else -> listOf("-")
                 }
@@ -374,18 +383,18 @@ fun EncryptorApp(
                     onExpandedChange = { if (optionList.size > 1) expandedOption = !expandedOption },
                     modifier = Modifier.weight(0.4f)
                 ) {
-                     if (selectedKey == "Fechada") {
+                    if (selectedKey == "Fechada") {
                         TextField(
                             value = selectedOption,
-                            onValueChange = { 
+                            onValueChange = {
                                 if (it.length <= 6) {
                                     selectedOption = it.filter { char -> char.isDigit() }
                                 }
-                             },
+                            },
                             label = { Text("ddmmyy") },
                             visualTransformation = DateVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                             colors = TextFieldDefaults.colors(
+                            colors = TextFieldDefaults.colors(
                                 focusedContainerColor = surfaceColor,
                                 unfocusedContainerColor = surfaceColor,
                                 focusedTextColor = primaryText,
@@ -519,8 +528,7 @@ fun EncryptorApp(
 fun DefaultPreview() {
     val keys = listOf(
         "Palérinofu", "Murciélago", "Corrida",
-        "Corrida intrínseca simple", "Corrida intrínseca compuesta",
-        "Autocorrida por palabra", "Autocorrida por inicial", "Abecedárica", "Fechada",
+        "Corrida intrínseca", "Autocorrida", "Abecedárica", "Fechada",
         "Paquidermo", "Araucano", "Superamigos", "Vocalica",
         "Idioma X", "Dame tu pico", "Karlina Betfuse", "Morse"
     ).sorted()
